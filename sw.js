@@ -1,13 +1,15 @@
 // Life Clock Service Worker
 // Caches the entire app shell for offline use.
 
-const CACHE_VERSION = 3;
+const CACHE_VERSION = 4;
 const CACHE_NAME = `lifeclock-v${CACHE_VERSION}`;
 
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
     './manifest.json',
+    './robots.txt',
+    './sitemap.xml',
     './assets/css/style.css',
     './assets/js/app.js',
     './assets/img/favicon.svg',

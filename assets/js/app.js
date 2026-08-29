@@ -852,6 +852,34 @@
         });
     }
 
+    // ============== Hamburger menu (mobile) ==============
+    function setupHamburger() {
+        const btn = document.getElementById('hamburgerBtn');
+        const navLinks = document.getElementById('navLinks');
+        if (!btn || !navLinks) return;
+
+        btn.addEventListener('click', () => {
+            const isOpen = navLinks.classList.toggle('open');
+            btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        });
+
+        // Close menu when a link is clicked (mobile UX)
+        navLinks.querySelectorAll('a').forEach(a => {
+            a.addEventListener('click', () => {
+                navLinks.classList.remove('open');
+                btn.setAttribute('aria-expanded', 'false');
+            });
+        });
+
+        // Close menu when clicking outside (on mobile)
+        document.addEventListener('click', (e) => {
+            if (!navLinks.contains(e.target) && !btn.contains(e.target)) {
+                navLinks.classList.remove('open');
+                btn.setAttribute('aria-expanded', 'false');
+            }
+        });
+    }
+
     // ============== Init ==============
     async function init() {
         // Apply saved theme first
@@ -862,6 +890,7 @@
         setupConfirmModal();
         setupThemes();
         setupInstallPrompt();
+        setupHamburger();
 
         // Register service worker
         if ('serviceWorker' in navigator) {

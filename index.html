@@ -2,33 +2,98 @@
 <html lang="fa" dir="rtl" data-theme="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ساعت زندگی | Life Clock</title>
-    <meta name="description" content="ساعت زندگی — ساعتی که مناسب زندگی است و ساعت ۹ صبح آن همیشه طلوع آفتاب است.">
-    <meta name="theme-color" content="#fa8f3f">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="description" content="ساعت زندگی — ساعتی که مناسب زندگی است و ساعت ۹ صبح آن همیشه طلوع آفتاب است. اوقات شرعی، مبدل ساعت رسمی ⇄ زندگی، اختلاف زمانی، بلاگ و تحقیقات. کاملاً آفلاین.">
+    <meta name="keywords" content="ساعت زندگی, life clock, اوقات شرعی, prayer times, طلوع, غروب, مبدل ساعت, timezone, ایران, ایران">
+    <meta name="author" content="Life Clock">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#fa8f3f" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0f0c29" media="(prefers-color-scheme: dark)">
+    <meta name="application-name" content="ساعت زندگی">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="ساعت زندگی">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+
+    <!-- Open Graph (Facebook, WhatsApp, Telegram) -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="ساعت زندگی | Life Clock">
+    <meta property="og:description" content="ساعتی که مناسب زندگی است و ساعت ۹ صبح آن همیشه طلوع آفتاب است. اوقات شرعی، مبدل، اختلاف زمانی، بلاگ.">
+    <meta property="og:url" content="https://creativewavecom.github.io/lifeclock/">
+    <meta property="og:site_name" content="ساعت زندگی">
+    <meta property="og:locale" content="fa_IR">
+    <meta property="og:image" content="https://creativewavecom.github.io/lifeclock/assets/img/icon-512.png">
+    <meta property="og:image:width" content="512">
+    <meta property="og:image:height" content="512">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="ساعت زندگی | Life Clock">
+    <meta name="twitter:description" content="ساعتی که مناسب زندگی است و ساعت ۹ صبح آن همیشه طلوع آفتاب است.">
+    <meta name="twitter:image" content="https://creativewavecom.github.io/lifeclock/assets/img/icon-512.png">
+
+    <title>ساعت زندگی | Life Clock — مبدل، اوقات شرعی، اختلاف زمانی</title>
+
     <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="assets/img/icon-192.png">
     <link rel="manifest" href="manifest.json">
+    <link rel="canonical" href="https://creativewavecom.github.io/lifeclock/">
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" href="assets/css/style.css">
+
+    <!-- Structured data (JSON-LD) for SEO -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "ساعت زندگی",
+        "alternateName": "Life Clock",
+        "description": "ساعتی که مناسب زندگی است و ساعت ۹ صبح آن همیشه طلوع آفتاب است. اوقات شرعی، مبدل، اختلاف زمانی.",
+        "url": "https://creativewavecom.github.io/lifeclock/",
+        "applicationCategory": "LifestyleApplication",
+        "operatingSystem": "Android, iOS, Web",
+        "inLanguage": "fa-IR",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "IRR"
+        },
+        "featureList": [
+            "اوقات شرعی بر اساس ساعت زندگی",
+            "مبدل ساعت رسمی به ساعت زندگی",
+            "اختلاف زمانی",
+            "کاملاً آفلاین",
+            "نصب روی اندروید"
+        ]
+    }
+    </script>
 </head>
 <body>
+    <!-- Skip-to-content link for accessibility -->
+    <a href="#widget" class="skip-link">پرش به محتوا</a>
+
     <!-- Animated background -->
     <div class="bg-gradient" aria-hidden="true"></div>
 
     <!-- Top navigation -->
-    <nav class="topnav">
+    <nav class="topnav" aria-label="ناوبری اصلی">
         <a href="#top" class="brand">⚡ ساعت زندگی</a>
-        <div class="nav-links">
+        <button class="hamburger" id="hamburgerBtn" aria-label="منو" aria-expanded="false">
+            <span></span><span></span><span></span>
+        </button>
+        <div class="nav-links" id="navLinks">
             <a href="#widget">ویجت</a>
             <a href="#definition">تعریف</a>
             <a href="#converter">مبدل</a>
-            <a href="#diff">اختلاف زمانی</a>
+            <a href="#diff">اختلاف</a>
             <a href="#prayer">اوقات شرعی</a>
             <a href="#blog">بلاگ</a>
-            <button id="installAppBtn" class="install-btn" title="نصب اپ">📲</button>
+            <button id="installAppBtn" class="install-btn" title="نصب اپ" aria-label="نصب اپ">📲</button>
         </div>
     </nav>
 
@@ -38,22 +103,24 @@
         <section id="widget" class="hero">
             <div class="widget-container">
                 <div class="widget-header">
-                    <span id="persianDate">—</span>
+                    <span id="persianDate" class="widget-date">—</span>
                     <button class="settings-btn" id="settingsBtn" aria-label="انتخاب شهر">⚙</button>
                 </div>
 
                 <div class="main-card">
-                    <div class="current-time" id="lifeClockBig">--:--</div>
+                    <div class="current-time-wrap">
+                        <div class="current-time-label">ساعت زندگی</div>
+                        <div class="current-time" id="lifeClockBig" aria-live="polite">--:--</div>
+                    </div>
                     <div class="prayer-info">
-                        <div class="countdown" id="nextPrayerCountdown">--:--</div>
+                        <div class="countdown-label">تا اذان بعدی</div>
+                        <div class="countdown" id="nextPrayerCountdown" aria-live="polite">--:--</div>
                         <div class="next-prayer-name" id="nextPrayerName">—</div>
                     </div>
                 </div>
 
-                <!-- Prayer times grid: names row + times row, only the next one is colored -->
-                <div class="prayer-grid" id="prayerGrid">
-                    <!-- filled by JS -->
-                </div>
+                <!-- Prayer grid: 2 rows (names + times in life clock format) -->
+                <div class="prayer-grid" id="prayerGrid"></div>
 
                 <div class="widget-footer">
                     <button class="city-label" id="currentCityBtn" title="برای تغییر شهر کلیک کنید">
@@ -65,16 +132,14 @@
                 </div>
             </div>
 
-            <!-- ===== City picker panel (much easier UX) ===== -->
-            <div class="settings-panel" id="settingsPanel">
+            <!-- City picker panel -->
+            <div class="settings-panel" id="settingsPanel" role="dialog" aria-label="انتخاب شهر">
                 <div class="settings-panel-header">
                     <h3>انتخاب شهر</h3>
                     <button id="closeSettings" class="close-x" aria-label="بستن">✕</button>
                 </div>
-                <input type="text" id="citySearch" placeholder="نام شهر را تایپ کنید..." autocomplete="off">
-                <div class="city-list" id="cityList">
-                    <!-- populated by JS -->
-                </div>
+                <input type="text" id="citySearch" placeholder="نام شهر را تایپ کنید..." autocomplete="off" aria-label="جستجوی شهر">
+                <div class="city-list" id="cityList"></div>
                 <button id="useAutoLocation" class="btn-secondary auto-btn">📍 تشخیص خودکار از روی موقعیت</button>
             </div>
         </section>
@@ -93,15 +158,14 @@
                 <div class="slogan-line-2">صبح‌ها زندگی رنگ تازه‌ای دارد. به زندگی رنگ تازه‌ای بدهیم.</div>
             </div>
 
-            <!-- Theme picker (inline) -->
             <div class="theme-picker-block">
                 <span class="theme-label">🎨 تم:</span>
-                <button class="theme-chip" data-theme="dark" title="تیره" style="--c1:#0f0c29;--c2:#302b63;">🌙</button>
-                <button class="theme-chip" data-theme="light" title="روشن" style="--c1:#f5f5f5;--c2:#e0e0e0;">☀️</button>
-                <button class="theme-chip" data-theme="sunset" title="غروب" style="--c1:#ff6b6b;--c2:#ffd93d;">🌅</button>
-                <button class="theme-chip" data-theme="ocean" title="اقیانوس" style="--c1:#0c5b8c;--c2:#00d4ff;">🌊</button>
-                <button class="theme-chip" data-theme="forest" title="جنگل" style="--c1:#0d3f2e;--c2:#52b788;">🌲</button>
-                <button class="theme-chip" data-theme="rose" title="گل" style="--c1:#5d245c;--c2:#ff7eb9;">🌸</button>
+                <button class="theme-chip" data-theme="dark" title="تیره" aria-label="تم تیره" style="--c1:#0f0c29;--c2:#302b63;">🌙</button>
+                <button class="theme-chip" data-theme="light" title="روشن" aria-label="تم روشن" style="--c1:#f5f5f5;--c2:#e0e0e0;">☀️</button>
+                <button class="theme-chip" data-theme="sunset" title="غروب" aria-label="تم غروب" style="--c1:#ff6b6b;--c2:#ffd93d;">🌅</button>
+                <button class="theme-chip" data-theme="ocean" title="اقیانوس" aria-label="تم اقیانوس" style="--c1:#0c5b8c;--c2:#00d4ff;">🌊</button>
+                <button class="theme-chip" data-theme="forest" title="جنگل" aria-label="تم جنگل" style="--c1:#0d3f2e;--c2:#52b788;">🌲</button>
+                <button class="theme-chip" data-theme="rose" title="گل" aria-label="تم گل" style="--c1:#5d245c;--c2:#ff7eb9;">🌸</button>
             </div>
         </section>
 
@@ -113,29 +177,29 @@
             <div class="converter-grid">
                 <div class="converter-col">
                     <label for="officialInput">ساعت رسمی</label>
-                    <input type="time" id="officialInput" step="1">
-                    <p class="sublabel">ساعت محلی شهرتون (HH:MM:SS)</p>
+                    <input type="time" id="officialInput" step="1" inputmode="numeric">
+                    <p class="sublabel">HH:MM:SS</p>
                 </div>
 
                 <div class="arrow">⇄</div>
 
                 <div class="converter-col">
                     <label for="lifeInput">ساعت زندگی</label>
-                    <input type="time" id="lifeInput" step="1">
-                    <p class="sublabel">ساعت زندگی = رسمی + اختلاف طلوع</p>
+                    <input type="time" id="lifeInput" step="1" inputmode="numeric">
+                    <p class="sublabel">HH:MM:SS</p>
                 </div>
             </div>
 
             <div class="conversion-info">
-                <span>اختلاف فعلی: <strong id="currentOffset">—</strong></span>
-                <span>طلوع امروز: <strong id="sunriseToday">—</strong></span>
-                <span>غروب امروز: <strong id="sunsetToday">—</strong></span>
+                <span>اختلاف: <strong id="currentOffset">—</strong></span>
+                <span>طلوع: <strong id="sunriseToday">—</strong></span>
+                <span>غروب: <strong id="sunsetToday">—</strong></span>
             </div>
         </section>
 
         <!-- ============ TIME DIFF ============ -->
         <section id="diff" class="card">
-            <h2>⏱ اختلاف زمانی ساعت زندگی و رسمی</h2>
+            <h2>⏱ اختلاف زمانی</h2>
             <p class="hint">اختلاف هر روز با طلوع آفتاب تغییر می‌کنه — در تابستان کمتر، در زمستان بیشتر.</p>
 
             <div class="diff-display">
@@ -158,7 +222,7 @@
             </div>
         </section>
 
-        <!-- ============ PRAYER TABLE (detailed) ============ -->
+        <!-- ============ PRAYER TABLE ============ -->
         <section id="prayer" class="card">
             <h2>🕌 اوقات شرعی به همراه ساعت زندگی</h2>
             <p class="hint">اوقات شرعی شهرتون به همراه معادل ساعت زندگی هر کدوم.</p>
@@ -166,8 +230,8 @@
             <div class="prayer-table">
                 <div class="prayer-row header">
                     <div>نام</div>
-                    <div>ساعت رسمی</div>
-                    <div>ساعت زندگی</div>
+                    <div>رسمی</div>
+                    <div>زندگی</div>
                     <div>وضعیت</div>
                 </div>
                 <div class="prayer-row" data-prayer="fajr">
@@ -259,7 +323,7 @@
             <p>این پروژه یک ابزار آزاد و آفلاین برای نمایش «ساعت زندگی» است — تعریف شده به‌عنوان ساعت ۹ صبح = طلوع آفتاب واقعی شهر شما. تمام محاسبات بدون نیاز به سرور و با فرمول NOAA انجام می‌شود.</p>
             <ul class="about-list">
                 <li>🌍 <strong>کاملاً آفلاین</strong> — هیچ سرور یا API پولی لازم نیست</li>
-                <li>🔒 <strong>حفظ حریم خصوصی</strong> — لوکیشن فقط برای تشخیص اولیه شهر استفاده می‌شه و ذخیره نمی‌شه</li>
+                <li>🔒 <strong>حفظ حریم خصوصی</strong> — لوکیشن فقط برای تشخیص اولیه شهر استفاده می‌شه</li>
                 <li>📱 <strong>قابل نصب روی اندروید</strong> — به‌عنوان وب‌اپ مستقل نصب می‌شه</li>
                 <li>🎨 <strong>چندین تم</strong> — هر کاربر تم دلخواهش رو انتخاب می‌کنه</li>
                 <li>🌐 <strong>متن‌باز</strong> — کد روی GitHub در دسترسه</li>
@@ -276,9 +340,9 @@
     </main>
 
     <!-- Confirmation modal for detected city -->
-    <div class="modal-overlay" id="confirmModal">
+    <div class="modal-overlay" id="confirmModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
         <div class="modal">
-            <h3>📍 شهر شما</h3>
+            <h3 id="modalTitle">📍 شهر شما</h3>
             <p>شهر شما به‌عنوان <strong id="detectedCity">—</strong> تشخیص داده شد.</p>
             <p class="modal-hint">آیا این درست است؟</p>
             <div class="modal-actions">

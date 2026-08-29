@@ -1,27 +1,31 @@
 /* ============================================================
  * Life Clock website — single-file vanilla JS
  *
- * Definition (per spec):
- *   Life Clock 09:00 always equals real sunrise for the user's city.
- *   So:  lifeClock = officialLocalTimeOfDay + (9h - sunriseLocalSecondsOfDay)
+ * Definition: life clock 09:00 always equals real sunrise for the city.
+ *   lifeClock = officialLocalTimeOfDay + (9h - sunriseLocalSecondsOfDay)
  *
- * All math runs in the browser, fully offline after first page load.
- * City auto-detection uses free public APIs (geolocation or IP-based).
+ * All math runs in the browser. After first load, fully offline.
+ *
+ * Detection strategy (first visit):
+ *   1. Try navigator.geolocation with a SHORT timeout (3s). If granted, use it.
+ *   2. If denied OR timed out, fall back to IP-based detection (ipapi.co).
+ *   3. Always show a confirmation modal — user must confirm before saving.
  * ============================================================ */
 
 (function () {
     'use strict';
 
     // ============== Constants ==============
-    const SUNRISE_LIFE_HOUR = 9; // life-clock hour at real sunrise
+    const SUNRISE_LIFE_HOUR = 9;
     const SUNRISE_LIFE_SECONDS = SUNRISE_LIFE_HOUR * 3600;
-    const ZENITH_OFFICIAL = 90.833; // sunrise/sunset zenith (with refraction)
-    const ZENITH_FAJR = 108.0;     // Fajr: sun 18° below horizon (Shia)
-    const ZENITH_ISHA = 107.0;     // Isha: sun 17° below horizon (Shia)
+    const ZENITH_OFFICIAL = 90.833;
+    const ZENITH_FAJR = 108.0;
+    const ZENITH_ISHA = 107.0;
     const STORAGE_KEY = 'lifeclock.city';
     const THEME_KEY = 'lifeclock.theme';
+    const DETECT_REJECTED_KEY = 'lifeclock.detectRejected';
 
-    // Preset cities (lat, lon, timezone)
+    // Preset cities — searchable by Persian or English name
     const PRESET_CITIES = [
         { name: 'تهران', en: 'Tehran', lat: 35.6892, lon: 51.3890, tz: 'Asia/Tehran' },
         { name: 'شیراز', en: 'Shiraz', lat: 29.5918, lon: 52.5837, tz: 'Asia/Tehran' },
@@ -37,40 +41,71 @@
         { name: 'اردبیل', en: 'Ardabil', lat: 38.2498, lon: 48.2957, tz: 'Asia/Tehran' },
         { name: 'بندرعباس', en: 'Bandar Abbas', lat: 27.1832, lon: 56.2666, tz: 'Asia/Tehran' },
         { name: 'زاهدان', en: 'Zahedan', lat: 29.5011, lon: 60.8629, tz: 'Asia/Tehran' },
+        { name: 'ارومیه', en: 'Urmia', lat: 37.5470, lon: 45.0730, tz: 'Asia/Tehran' },
+        { name: 'گرگان', en: 'Gorgan', lat: 36.8450, lon: 54.4340, tz: 'Asia/Tehran' },
+        { name: 'سنندج', en: 'Sanandaj', lat: 35.3140, lon: 46.9930, tz: 'Asia/Tehran' },
+        { name: 'خرم‌آباد', en: 'Khorramabad', lat: 33.4870, lon: 48.3530, tz: 'Asia/Tehran' },
+        { name: 'بجنورد', en: 'Bojnourd', lat: 37.4760, lon: 57.3270, tz: 'Asia/Tehran' },
+        { name: 'ایلام', en: 'Ilam', lat: 33.6370, lon: 46.4230, tz: 'Asia/Tehran' },
+        { name: 'بوشهر', en: 'Bushehr', lat: 28.9230, lon: 50.8230, tz: 'Asia/Tehran' },
+        { name: 'ساری', en: 'Sari', lat: 36.5630, lon: 53.0600, tz: 'Asia/Tehran' },
+        { name: 'قزوین', en: 'Qazvin', lat: 36.2710, lon: 50.0040, tz: 'Asia/Tehran' },
+        { name: 'همدان', en: 'Hamadan', lat: 34.7990, lon: 48.5150, tz: 'Asia/Tehran' },
+        { name: 'بیرجند', en: 'Birjand', lat: 32.8650, lon: 59.2160, tz: 'Asia/Tehran' },
+        { name: 'کرمانشاه', en: 'Kermanshah', lat: 34.3140, lon: 47.0650, tz: 'Asia/Tehran' },
         { name: 'کابل', en: 'Kabul', lat: 34.5553, lon: 69.2075, tz: 'Asia/Kabul' },
+        { name: 'هرات', en: 'Herat', lat: 34.3430, lon: 62.1990, tz: 'Asia/Kabul' },
         { name: 'بغداد', en: 'Baghdad', lat: 33.3152, lon: 44.3661, tz: 'Asia/Baghdad' },
         { name: 'استانبول', en: 'Istanbul', lat: 41.0082, lon: 28.9784, tz: 'Europe/Istanbul' },
+        { name: 'آنکارا', en: 'Ankara', lat: 39.9334, lon: 32.8597, tz: 'Europe/Istanbul' },
         { name: 'دبی', en: 'Dubai', lat: 25.2048, lon: 55.2708, tz: 'Asia/Dubai' },
+        { name: 'ابوظبی', en: 'Abu Dhabi', lat: 24.4539, lon: 54.3773, tz: 'Asia/Dubai' },
+        { name: 'دوحه', en: 'Doha', lat: 25.2854, lon: 51.5310, tz: 'Asia/Qatar' },
         { name: 'مکه', en: 'Mecca', lat: 21.3891, lon: 39.8579, tz: 'Asia/Riyadh' },
         { name: 'مدینه', en: 'Medina', lat: 24.5247, lon: 39.5692, tz: 'Asia/Riyadh' },
+        { name: 'ریاض', en: 'Riyadh', lat: 24.7136, lon: 46.6753, tz: 'Asia/Riyadh' },
         { name: 'لندن', en: 'London', lat: 51.5074, lon: -0.1278, tz: 'Europe/London' },
         { name: 'پاریس', en: 'Paris', lat: 48.8566, lon: 2.3522, tz: 'Europe/Paris' },
         { name: 'برلین', en: 'Berlin', lat: 52.5200, lon: 13.4050, tz: 'Europe/Berlin' },
+        { name: 'فرانکفورت', en: 'Frankfurt', lat: 50.1109, lon: 8.6821, tz: 'Europe/Berlin' },
+        { name: 'کارلسروهه', en: 'Karlsruhe', lat: 49.0069, lon: 8.4037, tz: 'Europe/Berlin' },
+        { name: 'مونیخ', en: 'Munich', lat: 48.1351, lon: 11.5820, tz: 'Europe/Berlin' },
+        { name: 'هامبورگ', en: 'Hamburg', lat: 53.5511, lon: 9.9937, tz: 'Europe/Berlin' },
+        { name: 'وین', en: 'Vienna', lat: 48.2082, lon: 16.3738, tz: 'Europe/Vienna' },
+        { name: 'آمستردام', en: 'Amsterdam', lat: 52.3676, lon: 4.9041, tz: 'Europe/Amsterdam' },
+        { name: 'استکهلم', en: 'Stockholm', lat: 59.3293, lon: 18.0686, tz: 'Europe/Stockholm' },
         { name: 'نیویورک', en: 'New York', lat: 40.7128, lon: -74.0060, tz: 'America/New_York' },
         { name: 'لس‌آنجلس', en: 'Los Angeles', lat: 34.0522, lon: -118.2437, tz: 'America/Los_Angeles' },
+        { name: 'شیکاگو', en: 'Chicago', lat: 41.8781, lon: -87.6298, tz: 'America/Chicago' },
         { name: 'تورنتو', en: 'Toronto', lat: 43.6532, lon: -79.3832, tz: 'America/Toronto' },
+        { name: 'ونکوور', en: 'Vancouver', lat: 49.2827, lon: -123.1207, tz: 'America/Vancouver' },
         { name: 'توکیو', en: 'Tokyo', lat: 35.6762, lon: 139.6503, tz: 'Asia/Tokyo' },
-        { name: 'سیدنی', en: 'Sydney', lat: -33.8688, lon: 151.2093, tz: 'Australia/Sydney' }
+        { name: 'سیدنی', en: 'Sydney', lat: -33.8688, lon: 151.2093, tz: 'Australia/Sydney' },
+        { name: 'ملبورن', en: 'Melbourne', lat: -37.8136, lon: 144.9631, tz: 'Australia/Melbourne' }
     ];
 
     const PRAYER_NAMES_FA = {
-        fajr: 'اذان صبح',
+        fajr: 'صبح',
         sunrise: 'طلوع',
-        dhuhr: 'اذان ظهر',
-        asr: 'اذان عصر',
-        maghrib: 'اذان مغرب',
-        isha: 'اذان عشاء'
+        dhuhr: 'ظهر',
+        asr: 'عصر',
+        maghrib: 'مغرب',
+        isha: 'عشاء'
     };
+
+    // Prayer slots shown in the widget grid (in order)
+    const WIDGET_PRAYER_ORDER = ['fajr', 'sunrise', 'dhuhr', 'asr', 'maghrib', 'isha'];
 
     // ============== State ==============
     let state = {
         city: null,
         solarTimes: null,
         prayerTimes: null,
-        pendingDetectedCity: null  // for confirmation modal
+        pendingDetectedCity: null,
+        detectInProgress: false
     };
 
-    // ============== Utility: Persian digits ==============
+    // ============== Persian digits ==============
     function toPersianDigits(s) {
         const map = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
         return String(s).replace(/\d/g, d => map[d]);
@@ -104,7 +139,6 @@
     }
 
     function persianWeekdayName(jsWd) {
-        // jsWd: 0=Sun..6=Sat → Persian: 0=Sat..6=Fri
         const persianWd = (jsWd + 1) % 7;
         return ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه'][persianWd];
     }
@@ -116,8 +150,7 @@
 
     function formatPersianDate(date, tz) {
         const fmt = new Intl.DateTimeFormat('en-US', {
-            timeZone: tz, year: 'numeric', month: 'numeric', day: 'numeric',
-            weekday: 'short'
+            timeZone: tz, year: 'numeric', month: 'numeric', day: 'numeric', weekday: 'short'
         });
         const parts = fmt.formatToParts(date);
         const y = parseInt(parts.find(p => p.type === 'year').value);
@@ -128,7 +161,7 @@
         return `${persianWeekdayName(jsWd)} ${toPersianDigits(j.jd)} ${persianMonthName(j.jm)} ${toPersianDigits(j.jy)}`;
     }
 
-    // ============== Sunrise/sunset calculator (NOAA) ==============
+    // ============== Sunrise/sunset (NOAA) ==============
     function dayOfYear(date) {
         const start = new Date(Date.UTC(date.getUTCFullYear(), 0, 0));
         return Math.floor((date - start) / 86400000);
@@ -223,27 +256,12 @@
     }
 
     // ============== Life clock math ==============
-    /**
-     * Returns the life-clock offset in MILLISECONDS for a city at a given instant.
-     * lifeOffset = (9h - sunriseLocalSecondsOfDay) * 1000
-     */
     function lifeOffsetMillis(now, tz, sunriseUtc) {
         if (!sunriseUtc) return 0;
-        const fmt = new Intl.DateTimeFormat('en-US', {
-            timeZone: tz, hour: '2-digit', minute: '2-digit', second: '2-digit',
-            hour12: false
-        });
-        const parts = fmt.formatToParts(sunriseUtc);
-        const h = parseInt(parts.find(p => p.type === 'hour').value) % 24;
-        const m = parseInt(parts.find(p => p.type === 'minute').value);
-        const s = parseInt(parts.find(p => p.type === 'second').value);
-        const sunriseLocalSeconds = h * 3600 + m * 60 + s;
-        return (SUNRISE_LIFE_SECONDS - sunriseLocalSeconds) * 1000;
+        const localSec = localSecondsOfDay(sunriseUtc, tz);
+        return (SUNRISE_LIFE_SECONDS - localSec) * 1000;
     }
 
-    /**
-     * Returns the local time-of-day (seconds since midnight) for a Date in a given tz.
-     */
     function localSecondsOfDay(date, tz) {
         const fmt = new Intl.DateTimeFormat('en-US', {
             timeZone: tz, hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
@@ -255,9 +273,6 @@
         return h * 3600 + m * 60 + s;
     }
 
-    /**
-     * Format a Date as official-time HH:MM in the given timezone.
-     */
     function formatHM(date, tz) {
         if (!date) return '—';
         const fmt = new Intl.DateTimeFormat('en-US', {
@@ -294,7 +309,7 @@
         return hms === '—' ? '—' : hms.substring(0, 5);
     }
 
-    // ============== Next prayer calculator ==============
+    // ============== Next prayer ==============
     function nextPrayer(now, prayers) {
         const list = [
             { name: 'fajr', t: prayers.fajr },
@@ -310,7 +325,6 @@
             const passed = [...list].reverse().find(p => p.t <= now);
             return { current: passed?.name, next: next.name, nextTime: next.t };
         }
-        // All today's prayers passed — next is tomorrow's Fajr
         const tomorrowFajr = new Date(now.getTime() + 24 * 3600 * 1000);
         const tomorrowSolar = computeSolarTimes(tomorrowFajr, state.city.lat, state.city.lon);
         return {
@@ -322,56 +336,114 @@
 
     // ============== Auto city detection ==============
     /**
-     * Try geolocation (one-shot, low-power). On failure or denial, fall back to IP.
-     * Returns the detected city or null.
+     * Detection strategy:
+     *   1. Try GPS with 3s timeout. If granted and accurate → reverse-geocode.
+     *   2. If GPS denied or timed out → fall back to IP-based detection.
+     *   3. Never auto-save — caller must show confirmation modal.
      */
     async function autoDetectCity() {
-        if (navigator.geolocation) {
-            try {
-                const pos = await new Promise((resolve, reject) => {
-                    navigator.geolocation.getCurrentPosition(resolve, reject, {
-                        timeout: 8000,
-                        maximumAge: 0,           // force a fresh (but approximate) read
-                        enableHighAccuracy: false // use low-power mode
-                    });
-                });
-                const { latitude, longitude } = pos.coords;
-                const city = await reverseGeocode(latitude, longitude);
-                if (city) return city;
-            } catch (e) {
-                // User denied, or timed out — fall through to IP-based detection.
+        // Step 1: try GPS first (one-shot, low-power, short timeout)
+        const gpsResult = await tryGpsDetection();
+        if (gpsResult) return gpsResult
+
+        // Step 2: fall back to IP
+        return await ipBasedDetect()
+    }
+
+    async function tryGpsDetection() {
+        if (!navigator.geolocation) return null
+        try {
+            const pos = await new Promise((resolve, reject) => {
+                navigator.geolocation.getCurrentPosition(resolve, reject, {
+                    timeout: 3000,            // short — don't make the user wait
+                    maximumAge: 5 * 60 * 1000, // accept a 5-min cached position
+                    enableHighAccuracy: false  // low-power, city-level accuracy is enough
+                })
+            })
+            const { latitude, longitude } = pos.coords
+            // Reverse-geocode via BigDataCloud (no API key needed)
+            const city = await reverseGeocode(latitude, longitude)
+            if (city) {
+                city.source = 'gps'
+                return city
             }
+        } catch (e) {
+            // Permission denied, or timed out, or position unavailable
+            return null
         }
-        // IP-based fallback (always succeeds unless network is down)
-        return await ipBasedDetect();
+        return null
     }
 
     async function reverseGeocode(lat, lon) {
         try {
-            const r = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=fa`);
-            const data = await r.json();
-            const cityName = data.city || data.locality || data.principalSubdivision || data.countryName || 'موقعیت من';
-            const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Tehran';
-            return { name: cityName, lat, lon, tz };
+            const r = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=fa`)
+            const data = await r.json()
+            const cityName = data.city || data.locality || data.principalSubdivision || data.countryName || 'موقعیت من'
+            // Try to find the closest preset city by distance — gives us a proper timezone
+            const closest = findClosestPresetCity(lat, lon)
+            if (closest) {
+                // Use the closest preset city's name in Persian if it's within ~50km
+                const dist = haversineKm(lat, lon, closest.lat, closest.lon)
+                if (dist < 50) {
+                    return { name: closest.name, lat: closest.lat, lon: closest.lon, tz: closest.tz, source: 'gps' }
+                }
+            }
+            // Otherwise use the reverse-geocoded name + device tz
+            const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Tehran'
+            return { name: cityName, lat, lon, tz, source: 'gps' }
         } catch (e) {
-            return null;
+            return null
         }
     }
 
+    /** Returns the preset city closest to the given lat/lon, by haversine distance. */
+    function findClosestPresetCity(lat, lon) {
+        let best = null
+        let bestDist = Infinity
+        for (const c of PRESET_CITIES) {
+            const d = haversineKm(lat, lon, c.lat, c.lon)
+            if (d < bestDist) { bestDist = d; best = c }
+        }
+        return best
+    }
+
+    function haversineKm(lat1, lon1, lat2, lon2) {
+        const R = 6371 // km
+        const dLat = (lat2 - lat1) * Math.PI / 180
+        const dLon = (lon2 - lon1) * Math.PI / 180
+        const a = Math.sin(dLat / 2) ** 2 +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLon / 2) ** 2
+        return 2 * R * Math.asin(Math.sqrt(a))
+    }
+
     async function ipBasedDetect() {
+        // Try ipapi.co first — returns city name + lat/lon + timezone
         try {
-            const r = await fetch('https://ipapi.co/json/');
-            const data = await r.json();
+            const r = await fetch('https://ipapi.co/json/')
+            const data = await r.json()
             if (data && data.latitude && data.longitude) {
+                // Snap to the closest preset city if within ~100km — this gives us
+                // a proper Persian name and known timezone
+                const closest = findClosestPresetCity(data.latitude, data.longitude)
+                if (closest) {
+                    const dist = haversineKm(data.latitude, data.longitude, closest.lat, closest.lon)
+                    if (dist < 100) {
+                        return { name: closest.name, lat: closest.lat, lon: closest.lon, tz: closest.tz, source: 'ip' }
+                    }
+                }
+                // Otherwise use the IP-detected city as-is
                 return {
                     name: data.city || data.region || 'موقعیت من',
                     lat: data.latitude,
                     lon: data.longitude,
-                    tz: data.timezone || 'Asia/Tehran'
-                };
+                    tz: data.timezone || 'Asia/Tehran',
+                    source: 'ip'
+                }
             }
         } catch (e) {}
-        return PRESET_CITIES[0]; // Tehran fallback
+        // Final fallback — Tehran
+        return { ...PRESET_CITIES[0], source: 'fallback' }
     }
 
     // ============== Persistence ==============
@@ -399,7 +471,6 @@
     function applyTheme(theme) {
         document.documentElement.setAttribute('data-theme', theme);
         saveTheme(theme);
-        // Highlight the active theme chip
         document.querySelectorAll('.theme-chip').forEach(chip => {
             chip.classList.toggle('active', chip.dataset.theme === theme);
         });
@@ -445,30 +516,36 @@
         return `${sign}${pad2(h)}:${pad2(m)}`;
     }
 
+    /**
+     * Render the prayer grid in the widget.
+     *
+     * Layout: two rows
+     *   Row 1: names (صبح، طلوع، ظهر، عصر، مغرب، عشاء)
+     *   Row 2: times in LIFE CLOCK format (not official time)
+     *
+     * Only the NEXT upcoming prayer is colored differently; everything else
+     * uses the default muted color.
+     */
     function renderPrayerGrid() {
         const grid = document.getElementById('prayerGrid');
-        const prayers = [
-            { key: 'fajr', label: 'صبح' },
-            { key: 'sunrise', label: 'طلوع' },
-            { key: 'dhuhr', label: 'ظهر' },
-            { key: 'asr', label: 'عصر' },
-            { key: 'maghrib', label: 'مغرب' },
-            { key: 'isha', label: 'عشاء' }
-        ];
         const now = new Date();
         const next = nextPrayer(now, state.prayerTimes);
-        let html = '';
-        prayers.forEach(p => {
-            const isNext = (next.next === p.key);
-            html += `<div class="grid-item name ${isNext ? 'active' : ''}">${p.label}</div>`;
+        const sunrise = state.solarTimes.sunrise;
+
+        let namesHtml = '';
+        let timesHtml = '';
+        WIDGET_PRAYER_ORDER.forEach(key => {
+            const isNext = (next.next === key);
+            namesHtml += `<div class="pg-name ${isNext ? 'next' : ''}">${PRAYER_NAMES_FA[key]}</div>`;
+            const time = state.prayerTimes[key];
+            const lifeTime = time ? formatLifeHM(time, state.city.tz, sunrise) : '—';
+            timesHtml += `<div class="pg-time ${isNext ? 'next' : ''}">${time ? toPersianDigits(lifeTime) : '—'}</div>`;
         });
-        prayers.forEach(p => {
-            const time = state.prayerTimes[p.key];
-            const isActive = time && time <= now;
-            const isNext = (next.next === p.key);
-            html += `<div class="grid-item time ${isActive ? 'active' : ''} ${isNext ? 'next' : ''}">${time ? toPersianDigits(formatHM(time, state.city.tz)) : '—'}</div>`;
-        });
-        grid.innerHTML = html;
+
+        grid.innerHTML = `
+            <div class="pg-row">${namesHtml}</div>
+            <div class="pg-row">${timesHtml}</div>
+        `;
     }
 
     function renderNextPrayer(now) {
@@ -484,12 +561,9 @@
         } else {
             document.getElementById('nextPrayerCountdown').textContent = '۰۰:۰۰';
         }
-        if (next.current) {
-            document.getElementById('currentPeriod').textContent =
-                `${PRAYER_NAMES_FA[next.current]} منقضی شد`;
-        } else {
-            document.getElementById('currentPeriod').textContent = 'قبل از اذان صبح';
-        }
+        // "منقضی شد" text removed per user request — status label is now empty
+        const statusEl = document.getElementById('currentPeriod');
+        if (statusEl) statusEl.textContent = '';
     }
 
     function renderDiff(now, sunrise) {
@@ -550,7 +624,7 @@
         });
     }
 
-    // ============== Converter (instant two-way binding) ==============
+    // ============== Converter (two-way instant) ==============
     let converterSource = null;
 
     function setupConverter() {
@@ -606,57 +680,118 @@
         return `${pad2(oh)}:${pad2(om)}:${pad2(os)}`;
     }
 
-    // ============== Settings + confirmation modal ==============
+    // ============== City picker panel (easy UX) ==============
     function setupSettings() {
         const btn = document.getElementById('settingsBtn');
         const panel = document.getElementById('settingsPanel');
         const search = document.getElementById('citySearch');
-        const datalist = document.getElementById('cityList');
         const useAuto = document.getElementById('useAutoLocation');
         const close = document.getElementById('closeSettings');
+        const cityLabelBtn = document.getElementById('currentCityBtn');
+        const cityListEl = document.getElementById('cityList');
 
-        // Make city name clickable too
-        const cityLabel = document.getElementById('currentCity');
-        cityLabel.style.cursor = 'pointer';
-        cityLabel.addEventListener('click', () => panel.classList.toggle('open'));
+        // Initial fill of city list
+        renderCityList('');
 
-        PRESET_CITIES.forEach(c => {
-            const opt = document.createElement('option');
-            opt.value = c.name;
-            datalist.appendChild(opt);
-        });
-
-        btn.addEventListener('click', () => panel.classList.toggle('open'));
+        btn.addEventListener('click', () => togglePanel());
+        cityLabelBtn.addEventListener('click', () => togglePanel());
         close.addEventListener('click', () => panel.classList.remove('open'));
 
-        search.addEventListener('change', () => {
-            const match = PRESET_CITIES.find(c =>
-                c.name === search.value || c.en.toLowerCase() === search.value.toLowerCase()
-            );
-            if (match) {
-                state.city = { ...match };
-                saveCity(state.city);
-                panel.classList.remove('open');
-                renderAll();
+        // Live search: filter as user types
+        search.addEventListener('input', () => {
+            renderCityList(search.value.trim());
+        });
+
+        // Enter key — pick the first matching city
+        search.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                const first = PRESET_CITIES.find(c => cityMatches(c, search.value.trim()));
+                if (first) {
+                    selectCity({ ...first });
+                    search.value = '';
+                    renderCityList('');
+                }
             }
         });
 
         useAuto.addEventListener('click', async () => {
             panel.classList.remove('open');
-            cityLabel.textContent = 'در حال تشخیص...';
-            const city = await autoDetectCity();
-            if (city) {
-                showConfirmModal(city);
-            } else {
-                cityLabel.textContent = 'تشخیص ناموفق';
+            await detectAndConfirm();
+        });
+
+        function togglePanel() {
+            panel.classList.toggle('open');
+            if (panel.classList.contains('open')) {
+                setTimeout(() => search.focus(), 50);
             }
+        }
+    }
+
+    function cityMatches(city, query) {
+        if (!query) return true;
+        const q = query.toLowerCase();
+        return city.name.toLowerCase().includes(q) ||
+               city.en.toLowerCase().includes(q);
+    }
+
+    function renderCityList(query) {
+        const list = document.getElementById('cityList');
+        const filtered = PRESET_CITIES.filter(c => cityMatches(c, query));
+        if (filtered.length === 0) {
+            list.innerHTML = '<div class="city-empty">شهری پیدا نشد. می‌تونید روی «تشخیص خودکار» بزنید.</div>';
+            return;
+        }
+        list.innerHTML = filtered.map(c => `
+            <button class="city-item" data-name="${c.name}">
+                <span class="city-fa">${c.name}</span>
+                <span class="city-en">${c.en}</span>
+            </button>
+        `).join('');
+        // Attach click handlers
+        list.querySelectorAll('.city-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const match = PRESET_CITIES.find(c => c.name === item.dataset.name);
+                if (match) selectCity({ ...match });
+            });
         });
     }
 
-    function showConfirmModal(city) {
-        state.pendingDetectedCity = city;
-        document.getElementById('detectedCity').textContent = city.name;
-        document.getElementById('confirmModal').classList.add('open');
+    function selectCity(city) {
+        state.city = city;
+        saveCity(state.city);
+        document.getElementById('settingsPanel').classList.remove('open');
+        document.getElementById('citySearch').value = '';
+        renderCityList('');
+        renderAll();
+    }
+
+    // ============== Auto detection + confirmation modal ==============
+    async function detectAndConfirm() {
+        if (state.detectInProgress) return;
+        state.detectInProgress = true;
+        document.getElementById('currentCity').textContent = 'در حال تشخیص...';
+
+        const city = await autoDetectCity();
+        state.detectInProgress = false;
+
+        if (city) {
+            state.pendingDetectedCity = city;
+            document.getElementById('detectedCity').textContent = city.name;
+            const modal = document.getElementById('confirmModal');
+            modal.classList.add('open');
+
+            // Add a small note about the detection source
+            const sourceLabel = city.source === 'gps' ? '(تشخیص دقیق از GPS)' :
+                                city.source === 'ip' ? '(تشخیص حدودی از IP)' :
+                                '(پیش‌فرض)';
+            const detectedEl = document.getElementById('detectedCity');
+            detectedEl.textContent = `${city.name} ${sourceLabel}`;
+        } else {
+            document.getElementById('currentCity').textContent = 'تشخیص ناموفق بود';
+            // Open settings so the user can pick manually
+            document.getElementById('settingsPanel').classList.add('open');
+            setTimeout(() => document.getElementById('citySearch').focus(), 50);
+        }
     }
 
     function setupConfirmModal() {
@@ -666,9 +801,7 @@
 
         confirmBtn.addEventListener('click', () => {
             if (state.pendingDetectedCity) {
-                state.city = state.pendingDetectedCity;
-                saveCity(state.city);
-                renderAll();
+                selectCity(state.pendingDetectedCity);
             }
             modal.classList.remove('open');
             state.pendingDetectedCity = null;
@@ -676,9 +809,9 @@
 
         rejectBtn.addEventListener('click', () => {
             modal.classList.remove('open');
-            // Open the settings panel so the user can pick a city manually
+            // Open the city picker panel
             document.getElementById('settingsPanel').classList.add('open');
-            document.getElementById('citySearch').focus();
+            setTimeout(() => document.getElementById('citySearch').focus(), 50);
             state.pendingDetectedCity = null;
         });
     }
@@ -696,11 +829,9 @@
     function setupInstallPrompt() {
         const installBtn = document.getElementById('installAppBtn');
         if (!installBtn) return;
-        // Hide initially — show only when install is available
         installBtn.style.display = 'none';
 
         window.addEventListener('beforeinstallprompt', (e) => {
-            // Prevent the mini-infobar from appearing on mobile
             e.preventDefault();
             deferredInstallPrompt = e;
             installBtn.style.display = 'inline-block';
@@ -723,7 +854,7 @@
 
     // ============== Init ==============
     async function init() {
-        // Apply saved theme first (before any rendering)
+        // Apply saved theme first
         applyTheme(loadTheme());
 
         setupConverter();
@@ -732,13 +863,11 @@
         setupThemes();
         setupInstallPrompt();
 
-        // Register service worker for offline support
+        // Register service worker
         if ('serviceWorker' in navigator) {
             try {
                 await navigator.serviceWorker.register('sw.js');
-            } catch (e) {
-                // SW registration failed — site still works online
-            }
+            } catch (e) {}
         }
 
         // Load saved city, or auto-detect on first visit
@@ -747,12 +876,18 @@
             state.city = saved;
             renderAll();
         } else {
-            document.getElementById('currentCity').textContent = 'در حال تشخیص خودکار...';
-            const city = await autoDetectCity();
-            if (city) {
-                showConfirmModal(city);
-            } else {
+            await detectAndConfirm();
+            // If user closed the modal without confirming, render with the detected city
+            // anyway (better than showing "--:--" forever).
+            if (!state.city && state.pendingDetectedCity) {
+                state.city = state.pendingDetectedCity;
+                saveCity(state.city);
+                renderAll();
+            }
+            // Last resort fallback
+            if (!state.city) {
                 state.city = PRESET_CITIES[0];
+                saveCity(state.city);
                 renderAll();
             }
         }

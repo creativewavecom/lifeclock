@@ -188,13 +188,16 @@ body {
     background: var(--accent);
     color: var(--bg-1);
     border: none;
-    padding: 6px 14px;
-    border-radius: 10px;
+    padding: 6px 10px;
+    border-radius: 8px;
     font-family: inherit;
     font-weight: 700;
-    font-size: 0.85rem;
+    font-size: 1rem;
     cursor: pointer;
     transition: transform 0.15s, opacity 0.2s;
+    line-height: 1;
+    min-width: 32px;
+    min-height: 32px;
 }
 .install-btn:hover { transform: translateY(-1px); }
 
@@ -375,9 +378,62 @@ main {
     color: var(--accent);
 }
 
-.status-label { color: var(--text-dim); font-size: 0.85rem; }
+.status-label {
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    /* Hidden by default — empty when no current period text */
+    min-height: 0;
+    line-height: 1.2;
+}
 
-/* Prayer times grid */
+/* Prayer times grid (two rows: names + times, only next is colored) */
+.prayer-grid {
+    margin-bottom: 16px;
+}
+
+.pg-row {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 6px;
+}
+
+.pg-row + .pg-row { margin-top: 6px; }
+
+.pg-name {
+    text-align: center;
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    padding: 6px 2px;
+    border-radius: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    transition: color 0.2s, background 0.2s, border-color 0.2s;
+}
+
+.pg-time {
+    text-align: center;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    direction: ltr;
+    font-variant-numeric: tabular-nums;
+    padding: 8px 2px;
+    border-radius: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    transition: color 0.2s, background 0.2s, border-color 0.2s;
+}
+
+/* Only the next prayer gets the accent color */
+.pg-name.next,
+.pg-time.next {
+    color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 18%, transparent);
+    border-color: var(--accent);
+}
+
+/* Legacy grid-container kept for backward compatibility (unused now) */
 .grid-container {
     display: grid;
     grid-template-columns: repeat(6, 1fr);
@@ -461,14 +517,82 @@ main {
     gap: 10px;
 }
 .settings-panel.open { display: flex; }
-.settings-panel h3 { font-size: 1rem; margin-bottom: 4px; color: var(--text); }
 
-.settings-actions {
+.settings-panel-header {
     display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
 }
-.settings-actions button { flex: 1; }
+.settings-panel-header h3 {
+    font-size: 1rem;
+    color: var(--text);
+    margin: 0;
+}
+
+.close-x {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.1rem;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+    line-height: 1;
+}
+.close-x:hover { background: var(--surface); color: var(--accent); }
+
+#citySearch {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 1rem;
+    width: 100%;
+}
+#citySearch:focus { outline: none; border-color: var(--accent); }
+
+.city-list {
+    max-height: 280px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 4px 0;
+}
+
+.city-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 14px;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 0.95rem;
+    cursor: pointer;
+    text-align: right;
+    transition: background 0.15s, border-color 0.15s;
+}
+.city-item:hover {
+    background: color-mix(in srgb, var(--accent) 14%, transparent);
+    border-color: var(--accent);
+}
+
+.city-fa { font-weight: 600; }
+.city-en { color: var(--text-dim); font-size: 0.85rem; direction: ltr; }
+
+.city-empty {
+    padding: 16px;
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 0.9rem;
+}
+
+.auto-btn { margin-top: 4px; }
 
 /* ===== Generic card ===== */
 .card {

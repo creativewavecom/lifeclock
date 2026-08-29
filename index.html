@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ساعت زندگی | Life Clock</title>
-    <meta name="description" content="ساعت زندگی — ساعتی که مناسب زندگی است و ساعت ۹ صبح آن همیشه طلوع آفتاب است. اوقات شرعی، مبدل، اختلاف زمانی، بلاگ و تحقیقات.">
+    <meta name="description" content="ساعت زندگی — ساعتی که مناسب زندگی است و ساعت ۹ صبح آن همیشه طلوع آفتاب است.">
     <meta name="theme-color" content="#fa8f3f">
     <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="assets/img/icon-192.png">
@@ -22,19 +22,64 @@
     <nav class="topnav">
         <a href="#top" class="brand">⚡ ساعت زندگی</a>
         <div class="nav-links">
-            <a href="#definition">تعریف</a>
             <a href="#widget">ویجت</a>
+            <a href="#definition">تعریف</a>
             <a href="#converter">مبدل</a>
             <a href="#diff">اختلاف زمانی</a>
             <a href="#prayer">اوقات شرعی</a>
             <a href="#blog">بلاگ</a>
-            <button id="installAppBtn" class="install-btn" title="نصب اپ">📲 نصب اپ</button>
+            <button id="installAppBtn" class="install-btn" title="نصب اپ">📲</button>
         </div>
     </nav>
 
     <main id="top">
 
-        <!-- Definition section (right at the top, before widget) -->
+        <!-- ============ WIDGET FIRST ============ -->
+        <section id="widget" class="hero">
+            <div class="widget-container">
+                <div class="widget-header">
+                    <span id="persianDate">—</span>
+                    <button class="settings-btn" id="settingsBtn" aria-label="انتخاب شهر">⚙</button>
+                </div>
+
+                <div class="main-card">
+                    <div class="current-time" id="lifeClockBig">--:--</div>
+                    <div class="prayer-info">
+                        <div class="countdown" id="nextPrayerCountdown">--:--</div>
+                        <div class="next-prayer-name" id="nextPrayerName">—</div>
+                    </div>
+                </div>
+
+                <!-- Prayer times grid: names row + times row, only the next one is colored -->
+                <div class="prayer-grid" id="prayerGrid">
+                    <!-- filled by JS -->
+                </div>
+
+                <div class="widget-footer">
+                    <button class="city-label" id="currentCityBtn" title="برای تغییر شهر کلیک کنید">
+                        📍 <span id="currentCity">در حال تشخیص...</span>
+                    </button>
+                    <div class="life-vs-official">
+                        رسمی: <span id="officialTime">--:--</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== City picker panel (much easier UX) ===== -->
+            <div class="settings-panel" id="settingsPanel">
+                <div class="settings-panel-header">
+                    <h3>انتخاب شهر</h3>
+                    <button id="closeSettings" class="close-x" aria-label="بستن">✕</button>
+                </div>
+                <input type="text" id="citySearch" placeholder="نام شهر را تایپ کنید..." autocomplete="off">
+                <div class="city-list" id="cityList">
+                    <!-- populated by JS -->
+                </div>
+                <button id="useAutoLocation" class="btn-secondary auto-btn">📍 تشخیص خودکار از روی موقعیت</button>
+            </div>
+        </section>
+
+        <!-- ============ DEFINITION ============ -->
         <section id="definition" class="definition-card">
             <h1>🌟 ساعت زندگی چیست؟</h1>
             <p class="definition-text">
@@ -48,7 +93,7 @@
                 <div class="slogan-line-2">صبح‌ها زندگی رنگ تازه‌ای دارد. به زندگی رنگ تازه‌ای بدهیم.</div>
             </div>
 
-            <!-- Theme picker (inline in definition section) -->
+            <!-- Theme picker (inline) -->
             <div class="theme-picker-block">
                 <span class="theme-label">🎨 تم:</span>
                 <button class="theme-chip" data-theme="dark" title="تیره" style="--c1:#0f0c29;--c2:#302b63;">🌙</button>
@@ -60,48 +105,7 @@
             </div>
         </section>
 
-        <!-- Hero / main widget (like the screenshot) -->
-        <section id="widget" class="hero">
-            <div class="widget-container">
-                <div class="widget-header">
-                    <span id="persianDate">—</span>
-                    <button class="settings-btn" id="settingsBtn" aria-label="تنظیمات">⚙</button>
-                </div>
-
-                <div class="main-card">
-                    <div class="current-time" id="lifeClockBig">--:--</div>
-                    <div class="prayer-info">
-                        <div class="countdown" id="nextPrayerCountdown">--:--</div>
-                        <div class="next-prayer-name" id="nextPrayerName">—</div>
-                        <div class="status-label" id="currentPeriod">—</div>
-                    </div>
-                </div>
-
-                <div class="grid-container" id="prayerGrid"></div>
-
-                <div class="widget-footer">
-                    <button class="city-label" id="currentCityBtn" title="برای تغییر شهر کلیک کنید">
-                        📍 <span id="currentCity">در حال تشخیص...</span>
-                    </button>
-                    <div class="life-vs-official">
-                        رسمی: <span id="officialTime">--:--</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- City settings dropdown -->
-            <div class="settings-panel" id="settingsPanel">
-                <h3>انتخاب شهر</h3>
-                <input type="text" id="citySearch" placeholder="جستجوی شهر..." list="cityList">
-                <datalist id="cityList"></datalist>
-                <div class="settings-actions">
-                    <button id="useAutoLocation" class="btn-secondary">📍 تشخیص خودکار</button>
-                    <button id="closeSettings" class="btn-secondary">بستن</button>
-                </div>
-            </div>
-        </section>
-
-        <!-- Converter: Official <-> Life Clock -->
+        <!-- ============ CONVERTER ============ -->
         <section id="converter" class="card">
             <h2>🔁 مبدل ساعت رسمی ⇄ ساعت زندگی</h2>
             <p class="hint">زمان فعلی به‌صورت پیش‌فرض پر شده. هر وقت تغییر دادید، در لحظه تبدیل می‌شه.</p>
@@ -129,7 +133,7 @@
             </div>
         </section>
 
-        <!-- Time difference visualization -->
+        <!-- ============ TIME DIFF ============ -->
         <section id="diff" class="card">
             <h2>⏱ اختلاف زمانی ساعت زندگی و رسمی</h2>
             <p class="hint">اختلاف هر روز با طلوع آفتاب تغییر می‌کنه — در تابستان کمتر، در زمستان بیشتر.</p>
@@ -154,7 +158,7 @@
             </div>
         </section>
 
-        <!-- Prayer times section (based on life clock) -->
+        <!-- ============ PRAYER TABLE (detailed) ============ -->
         <section id="prayer" class="card">
             <h2>🕌 اوقات شرعی به همراه ساعت زندگی</h2>
             <p class="hint">اوقات شرعی شهرتون به همراه معادل ساعت زندگی هر کدوم.</p>
@@ -205,7 +209,7 @@
             </div>
         </section>
 
-        <!-- Blog section -->
+        <!-- ============ BLOG ============ -->
         <section id="blog" class="card">
             <h2>📚 بلاگ و تحقیقات</h2>
             <p class="hint">مقالات و تحقیقات درباره ساعت زندگی، فواید استفاده از آن، و مبانی علمی.</p>
@@ -249,7 +253,7 @@
             </div>
         </section>
 
-        <!-- About section -->
+        <!-- ============ ABOUT ============ -->
         <section id="about" class="card">
             <h2>ℹ️ درباره ساعت زندگی</h2>
             <p>این پروژه یک ابزار آزاد و آفلاین برای نمایش «ساعت زندگی» است — تعریف شده به‌عنوان ساعت ۹ صبح = طلوع آفتاب واقعی شهر شما. تمام محاسبات بدون نیاز به سرور و با فرمول NOAA انجام می‌شود.</p>

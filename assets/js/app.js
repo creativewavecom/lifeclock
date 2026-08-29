@@ -115,56 +115,32 @@
 
     // ============== Persian (Jalali) calendar ==============
     /**
-     * Convert Gregorian date to Jalali (Persian) date.
-     * Uses the well-known jdf.scr.ir algorithm (Birashk's method, fixed).
+     * Format a Date as a Persian date string using the browser's built-in
+     * Intl API with the 'persian' calendar. This is the most reliable way
+     * — no manual calendar math, works correctly for any date.
      */
-    function toJalali(gy, gm, gd) {
-        const g_d_m = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
-        let jy;
-        if (gy > 1600) {
-            jy = 979;
-            gy -= 621;
-        } else {
-            jy = 0;
-            gy -= 621;
-        }
-        const gy2 = (gm > 2) ? (gy + 1) : gy;
-        let days = (365 * gy) + Math.floor((gy2 + 3) / 4) - Math.floor((gy2 + 99) / 100) +
-            Math.floor((gy2 + 399) / 400) - 80 + gd + g_d_m[gm - 1];
-        jy += 33 * Math.floor(days / 12053);
-        days %= 12053;
-        jy += 4 * Math.floor(days / 1461);
-        days %= 1461;
-        if (days > 365) {
-            jy += Math.floor((days - 1) / 365);
-            days = (days - 1) % 365;
-        }
-        const jm = (days < 186) ? (1 + Math.floor(days / 31)) : (7 + Math.floor((days - 186) / 30));
-        const jd = 1 + ((days < 186) ? (days % 31) : ((days - 186) % 30));
-        return { jy, jm, jd };
-    }
-
-    function persianWeekdayName(jsWd) {
-        const persianWd = (jsWd + 1) % 7;
-        return ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه'][persianWd];
-    }
-
-    function persianMonthName(m) {
-        return ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور',
-        'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'][m - 1];
-    }
-
     function formatPersianDate(date, tz) {
-        const fmt = new Intl.DateTimeFormat('en-US', {
-            timeZone: tz, year: 'numeric', month: 'numeric', day: 'numeric', weekday: 'short'
-        });
-        const parts = fmt.formatToParts(date);
-        const y = parseInt(parts.find(p => p.type === 'year').value);
-        const m = parseInt(parts.find(p => p.type === 'month').value);
-        const d = parseInt(parts.find(p => p.type === 'day').value);
-        const j = toJalali(y, m, d);
-        const jsWd = date.getDay();
-        return `${persianWeekdayName(jsWd)} ${toPersianDigits(j.jd)} ${persianMonthName(j.jm)} ${toPersianDigits(j.jy)}`;
+        try {
+            // Get Persian date parts in the city's timezone
+            const fmt = new Intl.DateTimeFormat('fa-IR-u-ca-persian', {
+                timeZone: tz,
+                weekday: 'long',
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
+            });
+            return fmt.format(date);
+        } catch (e) {
+            // Fallback: use Gregorian date if Persian calendar not supported
+            const fmt = new Intl.DateTimeFormat('fa-IR', {
+                timeZone: tz,
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            return fmt.format(date);
+        }
     }
 
     // ============== Sunrise/sunset (NOAA) ==============

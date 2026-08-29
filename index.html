@@ -1,11 +1,14 @@
 <!DOCTYPE html>
-<html lang="fa" dir="rtl">
+<html lang="fa" dir="rtl" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ساعت زندگی | Life Clock</title>
-    <meta name="description" content="ساعت زندگی — زمان‌سنجی بر اساس طلوع آفتاب واقعی. اوقات شرعی، مبدل، اختلاف زمانی، بلاگ و تحقیقات.">
+    <meta name="description" content="ساعت زندگی — ساعتی که مناسب زندگی است و ساعت ۹ صبح آن همیشه طلوع آفتاب است. اوقات شرعی، مبدل، اختلاف زمانی، بلاگ و تحقیقات.">
+    <meta name="theme-color" content="#fa8f3f">
     <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="assets/img/icon-192.png">
+    <link rel="manifest" href="manifest.json">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;700;900&display=swap" rel="stylesheet">
@@ -19,16 +22,44 @@
     <nav class="topnav">
         <a href="#top" class="brand">⚡ ساعت زندگی</a>
         <div class="nav-links">
+            <a href="#definition">تعریف</a>
             <a href="#widget">ویجت</a>
             <a href="#converter">مبدل</a>
             <a href="#diff">اختلاف زمانی</a>
             <a href="#prayer">اوقات شرعی</a>
             <a href="#blog">بلاگ</a>
-            <a href="#about">درباره</a>
+            <button id="installAppBtn" class="install-btn" title="نصب اپ">📲 نصب اپ</button>
         </div>
     </nav>
 
     <main id="top">
+
+        <!-- Definition section (right at the top, before widget) -->
+        <section id="definition" class="definition-card">
+            <h1>🌟 ساعت زندگی چیست؟</h1>
+            <p class="definition-text">
+                <strong>ساعتی که مناسب زندگی است</strong> و ساعت ۹ صبح آن همیشه طلوع آفتاب است.
+                با زندگی با این ساعت می‌توانیم حدود ساعت ۱۲ بخوابیم و ساعت ۹ طلوع آفتاب را ببینیم،
+                و به جای زندگی در شب، در صبح زندگی کنیم.
+            </p>
+
+            <div class="slogan">
+                <div class="slogan-line-1">«زندگی سیاه و سفید را رنگی کنیم»</div>
+                <div class="slogan-line-2">صبح‌ها زندگی رنگ تازه‌ای دارد. به زندگی رنگ تازه‌ای بدهیم.</div>
+            </div>
+
+            <!-- Theme picker (inline in definition section) -->
+            <div class="theme-picker-block">
+                <span class="theme-label">🎨 تم:</span>
+                <button class="theme-chip" data-theme="dark" title="تیره" style="--c1:#0f0c29;--c2:#302b63;">🌙</button>
+                <button class="theme-chip" data-theme="light" title="روشن" style="--c1:#f5f5f5;--c2:#e0e0e0;">☀️</button>
+                <button class="theme-chip" data-theme="sunset" title="غروب" style="--c1:#ff6b6b;--c2:#ffd93d;">🌅</button>
+                <button class="theme-chip" data-theme="ocean" title="اقیانوس" style="--c1:#0c5b8c;--c2:#00d4ff;">🌊</button>
+                <button class="theme-chip" data-theme="forest" title="جنگل" style="--c1:#0d3f2e;--c2:#52b788;">🌲</button>
+                <button class="theme-chip" data-theme="rose" title="گل" style="--c1:#5d245c;--c2:#ff7eb9;">🌸</button>
+            </div>
+        </section>
+
         <!-- Hero / main widget (like the screenshot) -->
         <section id="widget" class="hero">
             <div class="widget-container">
@@ -46,14 +77,12 @@
                     </div>
                 </div>
 
-                <div class="grid-container" id="prayerGrid">
-                    <!-- Filled by JS -->
-                </div>
+                <div class="grid-container" id="prayerGrid"></div>
 
                 <div class="widget-footer">
-                    <div class="city-label">
+                    <button class="city-label" id="currentCityBtn" title="برای تغییر شهر کلیک کنید">
                         📍 <span id="currentCity">در حال تشخیص...</span>
-                    </div>
+                    </button>
                     <div class="life-vs-official">
                         رسمی: <span id="officialTime">--:--</span>
                     </div>
@@ -65,8 +94,10 @@
                 <h3>انتخاب شهر</h3>
                 <input type="text" id="citySearch" placeholder="جستجوی شهر..." list="cityList">
                 <datalist id="cityList"></datalist>
-                <button id="useAutoLocation" class="btn-secondary">📍 تشخیص خودکار</button>
-                <button id="closeSettings" class="btn-secondary">بستن</button>
+                <div class="settings-actions">
+                    <button id="useAutoLocation" class="btn-secondary">📍 تشخیص خودکار</button>
+                    <button id="closeSettings" class="btn-secondary">بستن</button>
+                </div>
             </div>
         </section>
 
@@ -206,7 +237,7 @@
 
                 <article class="blog-card">
                     <h3><a href="blog/prayer-times-and-life-clock.html">اوقات شرعی و ساعت زندگی</a></h3>
-                    <p>چطور ساعت زندگی با اوقات شرعی هم‌پوشانی داره و هر کدوم چطور محاسبه می‌شن.</p>
+                    <p>چطور ساعت زندگی با اوقات شرعی هم‌پوشانی داره و هر کدوم چطور محاسبه می‌ شن.</p>
                     <a href="blog/prayer-times-and-life-clock.html" class="read-more">ادامه مطلب ←</a>
                 </article>
 
@@ -225,7 +256,8 @@
             <ul class="about-list">
                 <li>🌍 <strong>کاملاً آفلاین</strong> — هیچ سرور یا API پولی لازم نیست</li>
                 <li>🔒 <strong>حفظ حریم خصوصی</strong> — لوکیشن فقط برای تشخیص اولیه شهر استفاده می‌شه و ذخیره نمی‌شه</li>
-                <li>📱 <strong>اپ اندروید موجود</strong> — ویجت‌های صفحه اصلی و نوتیفیکیشن دائمی</li>
+                <li>📱 <strong>قابل نصب روی اندروید</strong> — به‌عنوان وب‌اپ مستقل نصب می‌شه</li>
+                <li>🎨 <strong>چندین تم</strong> — هر کاربر تم دلخواهش رو انتخاب می‌کنه</li>
                 <li>🌐 <strong>متن‌باز</strong> — کد روی GitHub در دسترسه</li>
             </ul>
             <p class="about-cta">
@@ -238,6 +270,19 @@
             <p class="footer-note">© ۲۰۲۴ — ساعت زندگی. محاسبات با فرمول NOAA، دقت ±۲ دقیقه.</p>
         </footer>
     </main>
+
+    <!-- Confirmation modal for detected city -->
+    <div class="modal-overlay" id="confirmModal">
+        <div class="modal">
+            <h3>📍 شهر شما</h3>
+            <p>شهر شما به‌عنوان <strong id="detectedCity">—</strong> تشخیص داده شد.</p>
+            <p class="modal-hint">آیا این درست است؟</p>
+            <div class="modal-actions">
+                <button id="confirmCity" class="btn-primary">✓ بله، درست است</button>
+                <button id="rejectCity" class="btn-secondary">✗ انتخاب دستی</button>
+            </div>
+        </div>
+    </div>
 
     <script src="assets/js/app.js" defer></script>
 </body>

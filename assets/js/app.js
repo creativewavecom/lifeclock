@@ -3,7 +3,7 @@
  *
  * Definition (per spec):
  *   Life Clock 09:00 always equals real sunrise for the user's city.
- *   So:  lifeClock = officialLocal + (9h - sunriseLocalSecondsOfDay)
+ *   So:  lifeClock = officialLocalTimeOfDay + (9h - sunriseLocalSecondsOfDay)
  *
  * All math runs in the browser, fully offline after first page load.
  * City auto-detection uses free public APIs (geolocation or IP-based).
@@ -19,6 +19,7 @@
     const ZENITH_FAJR = 108.0;     // Fajr: sun 18° below horizon (Shia)
     const ZENITH_ISHA = 107.0;     // Isha: sun 17° below horizon (Shia)
     const STORAGE_KEY = 'lifeclock.city';
+    const THEME_KEY = 'lifeclock.theme';
 
     // Preset cities (lat, lon, timezone)
     const PRESET_CITIES = [
@@ -30,6 +31,12 @@
         { name: 'اهواز', en: 'Ahvaz', lat: 31.3203, lon: 48.6692, tz: 'Asia/Tehran' },
         { name: 'کرج', en: 'Karaj', lat: 35.8400, lon: 50.9391, tz: 'Asia/Tehran' },
         { name: 'قم', en: 'Qom', lat: 34.6416, lon: 50.8746, tz: 'Asia/Tehran' },
+        { name: 'رشت', en: 'Rasht', lat: 37.2760, lon: 49.5880, tz: 'Asia/Tehran' },
+        { name: 'کرمان', en: 'Kerman', lat: 30.2832, lon: 57.0788, tz: 'Asia/Tehran' },
+        { name: 'یزد', en: 'Yazd', lat: 31.8974, lon: 54.3569, tz: 'Asia/Tehran' },
+        { name: 'اردبیل', en: 'Ardabil', lat: 38.2498, lon: 48.2957, tz: 'Asia/Tehran' },
+        { name: 'بندرعباس', en: 'Bandar Abbas', lat: 27.1832, lon: 56.2666, tz: 'Asia/Tehran' },
+        { name: 'زاهدان', en: 'Zahedan', lat: 29.5011, lon: 60.8629, tz: 'Asia/Tehran' },
         { name: 'کابل', en: 'Kabul', lat: 34.5553, lon: 69.2075, tz: 'Asia/Kabul' },
         { name: 'بغداد', en: 'Baghdad', lat: 33.3152, lon: 44.3661, tz: 'Asia/Baghdad' },
         { name: 'استانبول', en: 'Istanbul', lat: 41.0082, lon: 28.9784, tz: 'Europe/Istanbul' },
@@ -57,9 +64,10 @@
 
     // ============== State ==============
     let state = {
-        city: null,           // { name, lat, lon, tz }
-        solarTimes: null,     // today's SolarTimes
-        prayerTimes: null     // today's PrayerTimes
+        city: null,
+        solarTimes: null,
+        prayerTimes: null,
+        pendingDetectedCity: null  // for confirmation modal
     };
 
     // ============== Utility: Persian digits ==============
@@ -76,7 +84,6 @@
         const jDays = [31, 31, 31, 31, 31, 31, 30, 30, 30, 30, 30, 29];
         let jy = (gy <= 1600) ? 0 : gy - 621;
         let gyCalc = (gy <= 1600) ? gy - 621 : gy;
-        let gy2 = (gm > 2) ? gyCalc + 1 : gyCalc;
         let days = 365 * gyCalc + Math.floor((gyCalc + 3) / 4) - Math.floor((gyCalc + 99) / 100) +
             Math.floor((gyCalc + 399) / 400) - 80 + gd +
             gDays.slice(0, gm - 1).reduce((a, b) => a + b, 0);
@@ -96,9 +103,10 @@
         return { jy, jm, jd };
     }
 
-    function persianWeekdayName(weekday) {
-        // weekday: 0=Sat..6=Fri (Persian week)
-        return ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه'][weekday];
+    function persianWeekdayName(jsWd) {
+        // jsWd: 0=Sun..6=Sat → Persian: 0=Sat..6=Fri
+        const persianWd = (jsWd + 1) % 7;
+        return ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه'][persianWd];
     }
 
     function persianMonthName(m) {
@@ -107,7 +115,6 @@
     }
 
     function formatPersianDate(date, tz) {
-        // Use Intl to get parts in the given timezone
         const fmt = new Intl.DateTimeFormat('en-US', {
             timeZone: tz, year: 'numeric', month: 'numeric', day: 'numeric',
             weekday: 'short'
@@ -116,19 +123,15 @@
         const y = parseInt(parts.find(p => p.type === 'year').value);
         const m = parseInt(parts.find(p => p.type === 'month').value);
         const d = parseInt(parts.find(p => p.type === 'day').value);
-        const wdShort = parts.find(p => p.type === 'weekday').value;
         const j = toJalali(y, m, d);
-        // Map JS weekday to Persian (0=Sat..6=Fri)
-        const jsWd = date.getDay(); // 0=Sun..6=Sat
-        const persianWd = (jsWd + 1) % 7;
-        return `${persianWeekdayName(persianWd)} ${toPersianDigits(j.jd)} ${persianMonthName(j.jm)} ${toPersianDigits(j.jy)}`;
+        const jsWd = date.getDay();
+        return `${persianWeekdayName(jsWd)} ${toPersianDigits(j.jd)} ${persianMonthName(j.jm)} ${toPersianDigits(j.jy)}`;
     }
 
     // ============== Sunrise/sunset calculator (NOAA) ==============
     function dayOfYear(date) {
         const start = new Date(Date.UTC(date.getUTCFullYear(), 0, 0));
-        const diff = date - start;
-        return Math.floor(diff / 86400000);
+        return Math.floor((date - start) / 86400000);
     }
 
     function isLeapYear(y) {
@@ -158,15 +161,11 @@
         const zenithRad = (Math.PI / 180) * zenithDeg;
         const cosH = (Math.cos(zenithRad) - Math.sin(latRad) * Math.sin(declRad)) /
             (Math.cos(latRad) * Math.cos(declRad));
-        if (cosH > 1) return NaN;     // sun never rises above this zenith
-        if (cosH < -1) return NaN;    // sun never goes below this zenith
+        if (cosH > 1) return NaN;
+        if (cosH < -1) return NaN;
         return Math.acos(cosH);
     }
 
-    /**
-     * Returns solar times for a given UTC date and location.
-     * All times returned as UTC Date objects.
-     */
     function computeSolarTimes(dateUtc, lat, lon) {
         const year = dateUtc.getUTCFullYear();
         const doy = dayOfYear(dateUtc) + (dateUtc.getUTCHours() + dateUtc.getUTCMinutes() / 60) / 24;
@@ -189,7 +188,6 @@
         const fajrMin = minutesForZenith(ZENITH_FAJR, +1);
         const ishaMin = minutesForZenith(ZENITH_ISHA, -1);
 
-        // Asr: shadow factor 1 (Shia)
         const latRad = (Math.PI / 180) * lat;
         const asrAlt = Math.atan(1 + Math.tan(Math.abs(latRad - decl)));
         const cosHAsr = (Math.sin(-asrAlt) - Math.sin(latRad) * Math.sin(decl)) /
@@ -210,37 +208,27 @@
             fajr: toUtcDate(fajrMin),
             dhuhr: toUtcDate(dhuhrMinutes),
             asr: toUtcDate(asrMin),
-            maghrib: toUtcDate(sunsetMin), // Maghrib = sunset
+            maghrib: toUtcDate(sunsetMin),
             isha: toUtcDate(ishaMin),
             dayLengthMinutes: (!isNaN(sunriseMin) && !isNaN(sunsetMin)) ? Math.round(sunsetMin - sunriseMin) : 0
         };
     }
 
-    /**
-     * Get the most recent sunrise (today's if past, else yesterday's).
-     */
     function lastSunrise(now, lat, lon) {
         const todaySolar = computeSolarTimes(now, lat, lon);
         if (todaySolar.sunrise && now >= todaySolar.sunrise) return todaySolar.sunrise;
-        // Before today's sunrise — try yesterday
         const yesterday = new Date(now.getTime() - 24 * 3600 * 1000);
         const ySolar = computeSolarTimes(yesterday, lat, lon);
         return ySolar.sunrise || todaySolar.sunrise;
     }
 
     // ============== Life clock math ==============
-
     /**
-     * Compute life-clock offset in milliseconds for a city at a given instant.
-     *
-     *   lifeOffset = (9h - sunrise_local_seconds_of_day) * 1000
-     *
-     * Where sunrise_local_seconds_of_day is the local-time seconds of day at
-     * which sunrise occurred.
+     * Returns the life-clock offset in MILLISECONDS for a city at a given instant.
+     * lifeOffset = (9h - sunriseLocalSecondsOfDay) * 1000
      */
     function lifeOffsetMillis(now, tz, sunriseUtc) {
         if (!sunriseUtc) return 0;
-        // Convert sunrise UTC to local time-of-day seconds
         const fmt = new Intl.DateTimeFormat('en-US', {
             timeZone: tz, hour: '2-digit', minute: '2-digit', second: '2-digit',
             hour12: false
@@ -254,30 +242,21 @@
     }
 
     /**
-     * Convert an official local time to life clock time for a city.
-     * Both inputs and outputs are Date objects (UTC instants).
+     * Returns the local time-of-day (seconds since midnight) for a Date in a given tz.
      */
-    function officialToLife(officialDate, tz, sunriseUtc) {
-        const offset = lifeOffsetMillis(officialDate, tz, sunriseUtc);
-        return new Date(officialDate.getTime() + offset);
+    function localSecondsOfDay(date, tz) {
+        const fmt = new Intl.DateTimeFormat('en-US', {
+            timeZone: tz, hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
+        });
+        const parts = fmt.formatToParts(date);
+        const h = parseInt(parts.find(p => p.type === 'hour').value) % 24;
+        const m = parseInt(parts.find(p => p.type === 'minute').value);
+        const s = parseInt(parts.find(p => p.type === 'second').value);
+        return h * 3600 + m * 60 + s;
     }
 
     /**
-     * Convert a life clock time back to official local time.
-     */
-    function lifeToOfficial(lifeDate, tz, sunriseUtc) {
-        const offset = lifeOffsetMillis(lifeDate, tz, sunriseUtc);
-        return new Date(lifeDate.getTime() - offset);
-    }
-
-    /**
-     * Get the current official local time for a city.
-     * Returns a Date (UTC instant) representing "now" in the city's tz.
-     */
-    function nowInCity(tz) { return new Date(); }
-
-    /**
-     * Format a Date as HH:MM in the given timezone.
+     * Format a Date as official-time HH:MM in the given timezone.
      */
     function formatHM(date, tz) {
         if (!date) return '—';
@@ -296,27 +275,23 @@
     }
 
     /**
-     * Format a Date as HH:MM in life-clock time.
-     * Life clock = official + offset. We compute the offset and add it to the
-     * underlying instant, then format using GMT (since life clock has no real tz).
+     * Format a Date as life-clock HH:MM:SS.
+     * Life clock = (official_local_seconds + offset_seconds) mod 24h
      */
-    function formatLifeHM(officialDate, tz, sunriseUtc) {
-        if (!officialDate) return '—';
-        const life = officialToLife(officialDate, tz, sunriseUtc);
-        // Format in UTC since life clock is just an offset from local
-        const fmt = new Intl.DateTimeFormat('en-US', {
-            timeZone: 'UTC', hour: '2-digit', minute: '2-digit', hour12: false
-        });
-        return fmt.format(life);
-    }
-
     function formatLifeHMS(officialDate, tz, sunriseUtc) {
         if (!officialDate) return '—';
-        const life = officialToLife(officialDate, tz, sunriseUtc);
-        const fmt = new Intl.DateTimeFormat('en-US', {
-            timeZone: 'UTC', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
-        });
-        return fmt.format(life);
+        const localSec = localSecondsOfDay(officialDate, tz);
+        const offsetSec = lifeOffsetMillis(officialDate, tz, sunriseUtc) / 1000;
+        const lifeSec = ((localSec + offsetSec) % 86400 + 86400) % 86400;
+        const lh = Math.floor(lifeSec / 3600);
+        const lm = Math.floor((lifeSec % 3600) / 60);
+        const ls = Math.floor(lifeSec % 60);
+        return `${pad2(lh)}:${pad2(lm)}:${pad2(ls)}`;
+    }
+
+    function formatLifeHM(officialDate, tz, sunriseUtc) {
+        const hms = formatLifeHMS(officialDate, tz, sunriseUtc);
+        return hms === '—' ? '—' : hms.substring(0, 5);
     }
 
     // ============== Next prayer calculator ==============
@@ -332,8 +307,8 @@
 
         const next = list.find(p => p.t > now);
         if (next) {
-            const current = [...list].reverse().find(p => p.t <= now);
-            return { current: current?.name, next: next.name, nextTime: next.t };
+            const passed = [...list].reverse().find(p => p.t <= now);
+            return { current: passed?.name, next: next.name, nextTime: next.t };
         }
         // All today's prayers passed — next is tomorrow's Fajr
         const tomorrowFajr = new Date(now.getTime() + 24 * 3600 * 1000);
@@ -346,36 +321,36 @@
     }
 
     // ============== Auto city detection ==============
+    /**
+     * Try geolocation (one-shot, low-power). On failure or denial, fall back to IP.
+     * Returns the detected city or null.
+     */
     async function autoDetectCity() {
-        // Try browser geolocation first
         if (navigator.geolocation) {
             try {
                 const pos = await new Promise((resolve, reject) => {
                     navigator.geolocation.getCurrentPosition(resolve, reject, {
                         timeout: 8000,
-                        maximumAge: 600000,
-                        enableHighAccuracy: false
+                        maximumAge: 0,           // force a fresh (but approximate) read
+                        enableHighAccuracy: false // use low-power mode
                     });
                 });
                 const { latitude, longitude } = pos.coords;
-                // Reverse-geocode to a city + timezone
                 const city = await reverseGeocode(latitude, longitude);
                 if (city) return city;
             } catch (e) {
-                // Fall through to IP-based detection
+                // User denied, or timed out — fall through to IP-based detection.
             }
         }
-        // IP-based fallback
+        // IP-based fallback (always succeeds unless network is down)
         return await ipBasedDetect();
     }
 
     async function reverseGeocode(lat, lon) {
-        // Use BigDataCloud free reverse-geocoding API (no key needed)
         try {
             const r = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=fa`);
             const data = await r.json();
             const cityName = data.city || data.locality || data.principalSubdivision || data.countryName || 'موقعیت من';
-            // Use timezone from Intl API based on coordinates is hard; fall back to system tz
             const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Tehran';
             return { name: cityName, lat, lon, tz };
         } catch (e) {
@@ -384,7 +359,6 @@
     }
 
     async function ipBasedDetect() {
-        // Use free ipapi.co (no key, 30k/day)
         try {
             const r = await fetch('https://ipapi.co/json/');
             const data = await r.json();
@@ -396,9 +370,8 @@
                     tz: data.timezone || 'Asia/Tehran'
                 };
             }
-        } catch (e) { /* fall through */ }
-        // Final fallback — Tehran
-        return PRESET_CITIES[0];
+        } catch (e) {}
+        return PRESET_CITIES[0]; // Tehran fallback
     }
 
     // ============== Persistence ==============
@@ -414,8 +387,25 @@
         } catch (e) { return null; }
     }
 
-    // ============== UI rendering ==============
+    function saveTheme(theme) {
+        try { localStorage.setItem(THEME_KEY, theme); } catch (e) {}
+    }
 
+    function loadTheme() {
+        try { return localStorage.getItem(THEME_KEY) || 'dark'; }
+        catch (e) { return 'dark'; }
+    }
+
+    function applyTheme(theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+        saveTheme(theme);
+        // Highlight the active theme chip
+        document.querySelectorAll('.theme-chip').forEach(chip => {
+            chip.classList.toggle('active', chip.dataset.theme === theme);
+        });
+    }
+
+    // ============== UI rendering ==============
     function renderAll() {
         if (!state.city) return;
         const now = new Date();
@@ -423,28 +413,17 @@
         state.solarTimes = computeSolarTimes(now, state.city.lat, state.city.lon);
         state.prayerTimes = state.solarTimes;
 
-        // Big life clock
         document.getElementById('lifeClockBig').textContent =
             toPersianDigits(formatLifeHMS(now, state.city.tz, sunrise));
-
-        // Official time
         document.getElementById('officialTime').textContent =
             toPersianDigits(formatHM(now, state.city.tz));
-
-        // Persian date
         document.getElementById('persianDate').textContent =
             formatPersianDate(now, state.city.tz);
-
-        // City
         document.getElementById('currentCity').textContent = state.city.name;
 
-        // Prayer grid
         renderPrayerGrid();
-
-        // Next prayer countdown
         renderNextPrayer(now);
 
-        // Converter offsets
         document.getElementById('officialInput').value = formatHMS(now, state.city.tz);
         document.getElementById('lifeInput').value = formatLifeHMS(now, state.city.tz, sunrise);
         document.getElementById('currentOffset').textContent =
@@ -454,10 +433,7 @@
         document.getElementById('sunsetToday').textContent =
             toPersianDigits(formatHM(state.solarTimes.sunset, state.city.tz));
 
-        // Diff section
         renderDiff(now, sunrise);
-
-        // Prayer table
         renderPrayerTable(now);
     }
 
@@ -480,73 +456,67 @@
             { key: 'isha', label: 'عشاء' }
         ];
         const now = new Date();
-
+        const next = nextPrayer(now, state.prayerTimes);
         let html = '';
-        // Names row
         prayers.forEach(p => {
-            const isActive = state.prayerTimes[p.key] && state.prayerTimes[p.key] <= now;
-            const isNext = state.prayerTimes[p.key] && state.prayerTimes[p.key] > now &&
-                prayers.slice(0, prayers.indexOf(p)).every(pp => !state.prayerTimes[pp.key] || state.prayerTimes[pp.key] <= now);
+            const isNext = (next.next === p.key);
             html += `<div class="grid-item name ${isNext ? 'active' : ''}">${p.label}</div>`;
         });
-        // Times row
         prayers.forEach(p => {
             const time = state.prayerTimes[p.key];
             const isActive = time && time <= now;
-            html += `<div class="grid-item time ${isActive ? 'active' : ''}">${time ? toPersianDigits(formatHM(time, state.city.tz)) : '—'}</div>`;
+            const isNext = (next.next === p.key);
+            html += `<div class="grid-item time ${isActive ? 'active' : ''} ${isNext ? 'next' : ''}">${time ? toPersianDigits(formatHM(time, state.city.tz)) : '—'}</div>`;
         });
         grid.innerHTML = html;
     }
 
     function renderNextPrayer(now) {
         const next = nextPrayer(now, state.prayerTimes);
-        const nameEl = document.getElementById('nextPrayerName');
-        const countEl = document.getElementById('nextPrayerCountdown');
-        const statusEl = document.getElementById('currentPeriod');
-
-        nameEl.textContent = PRAYER_NAMES_FA[next.next] || '—';
-
-        // Countdown
+        document.getElementById('nextPrayerName').textContent = PRAYER_NAMES_FA[next.next] || '—';
         const remaining = next.nextTime - now;
         if (remaining > 0) {
             const h = Math.floor(remaining / 3600000);
             const m = Math.floor((remaining % 3600000) / 60000);
             const s = Math.floor((remaining % 60000) / 1000);
-            countEl.textContent = toPersianDigits(`${pad2(h)}:${pad2(m)}:${pad2(s)}`);
+            document.getElementById('nextPrayerCountdown').textContent =
+                toPersianDigits(`${pad2(h)}:${pad2(m)}:${pad2(s)}`);
         } else {
-            countEl.textContent = '۰۰:۰۰';
+            document.getElementById('nextPrayerCountdown').textContent = '۰۰:۰۰';
         }
-
-        // Status
         if (next.current) {
-            statusEl.textContent = `${PRAYER_NAMES_FA[next.current]} منقضی شد`;
+            document.getElementById('currentPeriod').textContent =
+                `${PRAYER_NAMES_FA[next.current]} منقضی شد`;
         } else {
-            statusEl.textContent = 'قبل از اذان صبح';
+            document.getElementById('currentPeriod').textContent = 'قبل از اذان صبح';
         }
     }
 
     function renderDiff(now, sunrise) {
-        const lifeNow = officialToLife(now, state.city.tz, sunrise);
-        document.getElementById('diffLifeTime').textContent = toPersianDigits(formatHM(lifeNow, 'UTC'));
-        document.getElementById('diffOfficialTime').textContent = toPersianDigits(formatHM(now, state.city.tz));
+        document.getElementById('diffLifeTime').textContent =
+            toPersianDigits(formatLifeHM(now, state.city.tz, sunrise));
+        document.getElementById('diffOfficialTime').textContent =
+            toPersianDigits(formatHM(now, state.city.tz));
 
         const offsetMin = lifeOffsetMillis(now, state.city.tz, sunrise) / 60000;
         const sign = offsetMin >= 0 ? '+' : '-';
         const abs = Math.abs(offsetMin);
         const h = Math.floor(abs / 60);
         const m = Math.round(abs % 60);
-        document.getElementById('diffNumber').textContent = toPersianDigits(`${sign}${pad2(h)}:${pad2(m)}`);
+        document.getElementById('diffNumber').textContent =
+            toPersianDigits(`${sign}${pad2(h)}:${pad2(m)}`);
 
-        // Explanation
         const sunriseStr = formatHM(sunrise, state.city.tz);
+        const dir = offsetMin >= 0 ? 'جلوتر' : 'عقب‌تر';
         const explanation = `طلوع امروز در ${state.city.name} ساعت ${toPersianDigits(sunriseStr)} به وقت رسمی بوده.
-ساعت زندگی، ${toPersianDigits(String(Math.abs(Math.round(offsetMin))))} دقیقه ${offsetMin >= 0 ? 'جلوتر' : 'عقب‌تر'} از ساعت رسمی است.
+ساعت زندگی، ${toPersianDigits(String(Math.abs(Math.round(offsetMin))))} دقیقه ${dir} از ساعت رسمی است.
 این اختلاف هر روز با تغییر زمان طلوع، کمی متفاوت می‌شه — در تابستان کمتر و در زمستان بیشتر.`;
         document.getElementById('diffExplanation').innerHTML = `<p>${explanation}</p>`;
     }
 
     function renderPrayerTable(now) {
         const rows = document.querySelectorAll('.prayer-row[data-prayer]');
+        const next = nextPrayer(now, state.prayerTimes);
         rows.forEach(row => {
             const key = row.dataset.prayer;
             const time = state.prayerTimes[key];
@@ -564,7 +534,6 @@
             officialCell.textContent = toPersianDigits(formatHM(time, state.city.tz));
             lifeCell.textContent = toPersianDigits(formatLifeHM(time, state.city.tz, state.solarTimes.sunrise));
 
-            // Determine status: passed / current / upcoming
             row.classList.remove('current');
             if (time <= now) {
                 statusCell.textContent = 'گذشته';
@@ -572,8 +541,6 @@
             } else {
                 statusCell.textContent = 'بعدی';
                 statusCell.className = 'prayer-status upcoming';
-                // Mark the row that's the immediate next prayer as current
-                const next = nextPrayer(now, state.prayerTimes);
                 if (next.next === key) {
                     row.classList.add('current');
                     statusCell.textContent = 'اذان بعدی';
@@ -584,7 +551,7 @@
     }
 
     // ============== Converter (instant two-way binding) ==============
-    let converterSource = null; // 'official' | 'life' | null
+    let converterSource = null;
 
     function setupConverter() {
         const officialInput = document.getElementById('officialInput');
@@ -611,35 +578,18 @@
         });
     }
 
-    /**
-     * Convert a HH:MM:SS string (interpreted as official local time today)
-     * into life-clock HH:MM:SS.
-     */
     function convertInputToLife(officialHMSStr) {
         if (!state.city) return null;
         const sunrise = lastSunrise(new Date(), state.city.lat, state.city.lon);
-        const today = new Date();
-        // Build a Date for "today at HH:MM:SS local" — but we need it in the city's tz.
-        // Strategy: parse the time, find today's date in the city's tz, combine.
         const parts = officialHMSStr.split(':').map(p => parseInt(p) || 0);
         const [h, m, s] = [parts[0] || 0, parts[1] || 0, parts[2] || 0];
-
-        // Get today's Y/M/D in the city's tz
-        const tzParts = new Intl.DateTimeFormat('en-US', {
-            timeZone: state.city.tz, year: 'numeric', month: '2-digit', day: '2-digit'
-        }).formatToParts(today);
-        const y = parseInt(tzParts.find(p => p.type === 'year').value);
-        const mo = parseInt(tzParts.find(p => p.type === 'month').value) - 1;
-        const d = parseInt(tzParts.find(p => p.type === 'day').value);
-
-        // Build the official date as if the city's wall clock said y/mo/d h:m:s
-        // We need to convert from "wall clock in tz" → UTC instant.
-        // Trick: use Intl with the tz and look at the UTC offset.
-        const wallClockDate = new Date(Date.UTC(y, mo, d, h, m, s));
-        // Get the UTC offset for that instant in the city tz:
-        const offsetMin = getTzOffsetMinutes(wallClockDate, state.city.tz);
-        const utcInstant = new Date(wallClockDate.getTime() - offsetMin * 60000);
-        return formatLifeHMS(utcInstant, state.city.tz, sunrise);
+        const officialSec = h * 3600 + m * 60 + s;
+        const offsetSec = lifeOffsetMillis(new Date(), state.city.tz, sunrise) / 1000;
+        const lifeSec = ((officialSec + offsetSec) % 86400 + 86400) % 86400;
+        const lh = Math.floor(lifeSec / 3600);
+        const lm = Math.floor((lifeSec % 3600) / 60);
+        const ls = Math.floor(lifeSec % 60);
+        return `${pad2(lh)}:${pad2(lm)}:${pad2(ls)}`;
     }
 
     function convertInputToOfficial(lifeHMSStr) {
@@ -647,47 +597,16 @@
         const sunrise = lastSunrise(new Date(), state.city.lat, state.city.lon);
         const parts = lifeHMSStr.split(':').map(p => parseInt(p) || 0);
         const [h, m, s] = [parts[0] || 0, parts[1] || 0, parts[2] || 0];
-
-        // Life clock = official + offset. To find official: we treat the life clock
-        // as if it were a UTC instant, then subtract the offset.
-        // Step 1: get today's date in city tz
-        const today = new Date();
-        const tzParts = new Intl.DateTimeFormat('en-US', {
-            timeZone: state.city.tz, year: 'numeric', month: '2-digit', day: '2-digit'
-        }).formatToParts(today);
-        const y = parseInt(tzParts.find(p => p.type === 'year').value);
-        const mo = parseInt(tzParts.find(p => p.type === 'month').value) - 1;
-        const d = parseInt(tzParts.find(p => p.type === 'day').value);
-
-        // Step 2: pretend the life clock is a UTC wall-clock of y/mo/d h:m:s
-        const lifeInstant = new Date(Date.UTC(y, mo, d, h, m, s));
-        // Step 3: subtract life offset to get the corresponding UTC instant of "official time"
-        const offset = lifeOffsetMillis(lifeInstant, state.city.tz, sunrise);
-        const officialInstant = new Date(lifeInstant.getTime() - offset);
-        return formatHMS(officialInstant, state.city.tz);
+        const lifeSec = h * 3600 + m * 60 + s;
+        const offsetSec = lifeOffsetMillis(new Date(), state.city.tz, sunrise) / 1000;
+        const officialSec = ((lifeSec - offsetSec) % 86400 + 86400) % 86400;
+        const oh = Math.floor(officialSec / 3600);
+        const om = Math.floor((officialSec % 3600) / 60);
+        const os = Math.floor(officialSec % 60);
+        return `${pad2(oh)}:${pad2(om)}:${pad2(os)}`;
     }
 
-    /**
-     * Returns the offset (in minutes) of the given tz from UTC at the given instant.
-     * Positive = tz is ahead of UTC.
-     */
-    function getTzOffsetMinutes(date, tz) {
-        // Use Intl to format the date in tz, then compare to UTC.
-        const utcDate = new Date(date.getTime());
-        const tzStr = new Intl.DateTimeFormat('en-US', {
-            timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit',
-            hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
-        }).formatToParts(utcDate);
-        const map = {};
-        tzStr.forEach(p => { map[p.type] = p.value; });
-        const asUtc = Date.UTC(
-            parseInt(map.year), parseInt(map.month) - 1, parseInt(map.day),
-            parseInt(map.hour) % 24, parseInt(map.minute), parseInt(map.second)
-        );
-        return Math.round((asUtc - utcDate.getTime()) / 60000);
-    }
-
-    // ============== Settings panel ==============
+    // ============== Settings + confirmation modal ==============
     function setupSettings() {
         const btn = document.getElementById('settingsBtn');
         const panel = document.getElementById('settingsPanel');
@@ -696,7 +615,11 @@
         const useAuto = document.getElementById('useAutoLocation');
         const close = document.getElementById('closeSettings');
 
-        // Populate datalist
+        // Make city name clickable too
+        const cityLabel = document.getElementById('currentCity');
+        cityLabel.style.cursor = 'pointer';
+        cityLabel.addEventListener('click', () => panel.classList.toggle('open'));
+
         PRESET_CITIES.forEach(c => {
             const opt = document.createElement('option');
             opt.value = c.name;
@@ -720,20 +643,103 @@
 
         useAuto.addEventListener('click', async () => {
             panel.classList.remove('open');
-            document.getElementById('currentCity').textContent = 'در حال تشخیص...';
+            cityLabel.textContent = 'در حال تشخیص...';
             const city = await autoDetectCity();
             if (city) {
-                state.city = city;
+                showConfirmModal(city);
+            } else {
+                cityLabel.textContent = 'تشخیص ناموفق';
+            }
+        });
+    }
+
+    function showConfirmModal(city) {
+        state.pendingDetectedCity = city;
+        document.getElementById('detectedCity').textContent = city.name;
+        document.getElementById('confirmModal').classList.add('open');
+    }
+
+    function setupConfirmModal() {
+        const modal = document.getElementById('confirmModal');
+        const confirmBtn = document.getElementById('confirmCity');
+        const rejectBtn = document.getElementById('rejectCity');
+
+        confirmBtn.addEventListener('click', () => {
+            if (state.pendingDetectedCity) {
+                state.city = state.pendingDetectedCity;
                 saveCity(state.city);
                 renderAll();
             }
+            modal.classList.remove('open');
+            state.pendingDetectedCity = null;
+        });
+
+        rejectBtn.addEventListener('click', () => {
+            modal.classList.remove('open');
+            // Open the settings panel so the user can pick a city manually
+            document.getElementById('settingsPanel').classList.add('open');
+            document.getElementById('citySearch').focus();
+            state.pendingDetectedCity = null;
+        });
+    }
+
+    // ============== Theme switcher ==============
+    function setupThemes() {
+        const chips = document.querySelectorAll('.theme-chip');
+        chips.forEach(chip => {
+            chip.addEventListener('click', () => applyTheme(chip.dataset.theme));
+        });
+    }
+
+    // ============== PWA install prompt ==============
+    let deferredInstallPrompt = null;
+    function setupInstallPrompt() {
+        const installBtn = document.getElementById('installAppBtn');
+        if (!installBtn) return;
+        // Hide initially — show only when install is available
+        installBtn.style.display = 'none';
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // Prevent the mini-infobar from appearing on mobile
+            e.preventDefault();
+            deferredInstallPrompt = e;
+            installBtn.style.display = 'inline-block';
+        });
+
+        installBtn.addEventListener('click', async () => {
+            if (!deferredInstallPrompt) return;
+            deferredInstallPrompt.prompt();
+            const choice = await deferredInstallPrompt.userChoice;
+            if (choice.outcome === 'accepted') {
+                installBtn.style.display = 'none';
+            }
+            deferredInstallPrompt = null;
+        });
+
+        window.addEventListener('appinstalled', () => {
+            installBtn.style.display = 'none';
         });
     }
 
     // ============== Init ==============
     async function init() {
+        // Apply saved theme first (before any rendering)
+        applyTheme(loadTheme());
+
         setupConverter();
         setupSettings();
+        setupConfirmModal();
+        setupThemes();
+        setupInstallPrompt();
+
+        // Register service worker for offline support
+        if ('serviceWorker' in navigator) {
+            try {
+                await navigator.serviceWorker.register('sw.js');
+            } catch (e) {
+                // SW registration failed — site still works online
+            }
+        }
 
         // Load saved city, or auto-detect on first visit
         const saved = loadCity();
@@ -744,12 +750,11 @@
             document.getElementById('currentCity').textContent = 'در حال تشخیص خودکار...';
             const city = await autoDetectCity();
             if (city) {
-                state.city = city;
-                saveCity(state.city);
+                showConfirmModal(city);
             } else {
-                state.city = PRESET_CITIES[0]; // Tehran fallback
+                state.city = PRESET_CITIES[0];
+                renderAll();
             }
-            renderAll();
         }
 
         // Tick every second

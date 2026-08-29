@@ -114,14 +114,23 @@
     function pad2(n) { return String(n).padStart(2, '0'); }
 
     // ============== Persian (Jalali) calendar ==============
+    /**
+     * Convert Gregorian date to Jalali (Persian) date.
+     * Uses the well-known jdf.scr.ir algorithm (Birashk's method, fixed).
+     */
     function toJalali(gy, gm, gd) {
-        const gDays = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-        const jDays = [31, 31, 31, 31, 31, 31, 30, 30, 30, 30, 30, 29];
-        let jy = (gy <= 1600) ? 0 : gy - 621;
-        let gyCalc = (gy <= 1600) ? gy - 621 : gy;
-        let days = 365 * gyCalc + Math.floor((gyCalc + 3) / 4) - Math.floor((gyCalc + 99) / 100) +
-            Math.floor((gyCalc + 399) / 400) - 80 + gd +
-            gDays.slice(0, gm - 1).reduce((a, b) => a + b, 0);
+        const g_d_m = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
+        let jy;
+        if (gy > 1600) {
+            jy = 979;
+            gy -= 621;
+        } else {
+            jy = 0;
+            gy -= 621;
+        }
+        const gy2 = (gm > 2) ? (gy + 1) : gy;
+        let days = (365 * gy) + Math.floor((gy2 + 3) / 4) - Math.floor((gy2 + 99) / 100) +
+            Math.floor((gy2 + 399) / 400) - 80 + gd + g_d_m[gm - 1];
         jy += 33 * Math.floor(days / 12053);
         days %= 12053;
         jy += 4 * Math.floor(days / 1461);
@@ -130,11 +139,8 @@
             jy += Math.floor((days - 1) / 365);
             days = (days - 1) % 365;
         }
-        let jm, jd;
-        for (let i = 0; i < 12; i++) {
-            if (days < jDays[i]) { jm = i + 1; jd = days + 1; break; }
-            days -= jDays[i];
-        }
+        const jm = (days < 186) ? (1 + Math.floor(days / 31)) : (7 + Math.floor((days - 186) / 30));
+        const jd = 1 + ((days < 186) ? (days % 31) : ((days - 186) % 30));
         return { jy, jm, jd };
     }
 

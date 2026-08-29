@@ -1,0 +1,630 @@
+/* ===== Life Clock website — single-file dark/glass aesthetic ===== */
+
+:root {
+    --bg-1: #0f0c29;
+    --bg-2: #302b63;
+    --bg-3: #24243e;
+    --accent: #fa8f3f;
+    --accent-2: #ffd700;
+    --accent-3: #00e5ff;
+    --surface: rgba(255, 255, 255, 0.07);
+    --surface-2: rgba(255, 255, 255, 0.13);
+    --border: rgba(255, 255, 255, 0.15);
+    --text: #f4f4f8;
+    --text-muted: rgba(244, 244, 248, 0.65);
+    --text-dim: rgba(244, 244, 248, 0.45);
+    --success: #4ade80;
+    --danger: #ef4444;
+    --radius: 18px;
+    --radius-sm: 10px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+    font-family: 'Vazirmatn', system-ui, -apple-system, sans-serif;
+    color: var(--text);
+    background: var(--bg-1);
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+}
+
+/* Animated gradient background */
+.bg-gradient {
+    position: fixed;
+    inset: 0;
+    background:
+        radial-gradient(ellipse at top right, rgba(250, 143, 63, 0.18), transparent 50%),
+        radial-gradient(ellipse at bottom left, rgba(0, 229, 255, 0.12), transparent 50%),
+        linear-gradient(135deg, var(--bg-1), var(--bg-2) 50%, var(--bg-3));
+    z-index: -1;
+}
+
+/* ===== Navigation ===== */
+.topnav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 24px;
+    background: rgba(15, 12, 41, 0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+}
+
+.brand {
+    font-weight: 900;
+    font-size: 1.15rem;
+    color: var(--text);
+    text-decoration: none;
+}
+
+.nav-links {
+    display: flex;
+    gap: 18px;
+}
+
+.nav-links a {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.92rem;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.nav-links a:hover { color: var(--accent); }
+
+main {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 24px 16px 80px;
+}
+
+/* ===== Hero / Main widget ===== */
+.hero {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 32px 0 16px;
+    position: relative;
+}
+
+.widget-container {
+    width: 100%;
+    max-width: 420px;
+    background: rgba(255, 255, 255, 0.07);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 28px;
+    padding: 22px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+    position: relative;
+}
+
+.widget-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    color: var(--text);
+    font-weight: 700;
+    font-size: 1rem;
+}
+
+.settings-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+.settings-btn:hover { color: var(--accent); }
+
+.main-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 18px;
+    padding: 20px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.current-time {
+    font-size: 3.5rem;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -2px;
+    color: var(--text);
+    direction: ltr;
+    font-variant-numeric: tabular-nums;
+}
+
+.prayer-info {
+    text-align: left;
+    font-size: 0.92rem;
+    line-height: 1.6;
+    color: var(--text-muted);
+}
+
+.countdown {
+    font-weight: 900;
+    font-size: 1.15rem;
+    color: var(--accent-2);
+    direction: ltr;
+    font-variant-numeric: tabular-nums;
+}
+
+.next-prayer-name {
+    font-weight: 700;
+    color: var(--accent);
+}
+
+.status-label { color: var(--text-dim); font-size: 0.85rem; }
+
+/* Prayer times grid (6 cols: Fajr, Sunrise, Dhuhr, Asr, Maghrib, Isha) */
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 6px;
+    margin-bottom: 16px;
+}
+
+.grid-item {
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 10px;
+    padding: 8px 2px;
+    text-align: center;
+    font-size: 0.78rem;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.grid-item.name {
+    font-weight: 700;
+    color: var(--text-muted);
+    font-size: 0.74rem;
+}
+
+.grid-item.time {
+    color: var(--text);
+    font-weight: 700;
+    font-size: 0.85rem;
+    direction: ltr;
+    font-variant-numeric: tabular-nums;
+}
+
+.grid-item.active {
+    background: rgba(250, 143, 63, 0.18);
+    border-color: var(--accent);
+    color: var(--accent) !important;
+}
+
+.widget-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+.city-label { display: flex; align-items: center; gap: 4px; }
+.life-vs-official { color: var(--accent-3); direction: ltr; font-variant-numeric: tabular-nums; }
+
+/* Settings dropdown panel */
+.settings-panel {
+    margin-top: 12px;
+    width: 100%;
+    max-width: 420px;
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 16px;
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+}
+.settings-panel.open { display: flex; }
+.settings-panel h3 { font-size: 1rem; margin-bottom: 4px; }
+
+/* ===== Generic card ===== */
+.card {
+    background: var(--surface);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-top: 32px;
+}
+
+.card h2 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: var(--text);
+}
+
+.card .hint {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-bottom: 18px;
+}
+
+/* ===== Converter ===== */
+.converter-grid {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 16px;
+    align-items: center;
+    margin-bottom: 18px;
+}
+
+.converter-col label {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+}
+
+.converter-col input {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 1.2rem;
+    font-weight: 700;
+    direction: ltr;
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+}
+
+.converter-col input:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: rgba(250, 143, 63, 0.08);
+}
+
+.converter-col .sublabel {
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    margin-top: 6px;
+    text-align: center;
+}
+
+.arrow {
+    font-size: 1.8rem;
+    color: var(--accent);
+    font-weight: 900;
+}
+
+.conversion-info {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    padding: 14px 16px;
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: var(--radius-sm);
+    color: var(--text-muted);
+    font-size: 0.88rem;
+}
+
+.conversion-info strong {
+    color: var(--text);
+    direction: ltr;
+    font-variant-numeric: tabular-nums;
+}
+
+/* ===== Diff section ===== */
+.diff-display {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 16px;
+    align-items: center;
+    margin-bottom: 18px;
+}
+
+.diff-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 18px;
+    text-align: center;
+}
+
+.diff-card.life { border-color: var(--accent-2); }
+.diff-card.official { border-color: var(--accent-3); }
+
+.diff-label {
+    display: block;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+}
+
+.diff-time {
+    display: block;
+    font-size: 2.2rem;
+    font-weight: 900;
+    color: var(--text);
+    direction: ltr;
+    font-variant-numeric: tabular-nums;
+}
+
+.diff-arrow {
+    text-align: center;
+    color: var(--text-muted);
+}
+
+.diff-number {
+    display: block;
+    font-size: 2.5rem;
+    font-weight: 900;
+    color: var(--accent);
+    direction: ltr;
+    font-variant-numeric: tabular-nums;
+}
+
+.diff-unit { font-size: 0.85rem; }
+
+.diff-explanation {
+    padding: 14px 16px;
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: var(--radius-sm);
+    color: var(--text-muted);
+    font-size: 0.92rem;
+    line-height: 1.7;
+}
+
+/* ===== Prayer table ===== */
+.prayer-table {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+}
+
+.prayer-row {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr 1fr 1fr;
+    padding: 12px 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    font-size: 0.92rem;
+    align-items: center;
+}
+
+.prayer-row:last-child { border-bottom: none; }
+
+.prayer-row.header {
+    background: rgba(255, 255, 255, 0.06);
+    font-weight: 700;
+    color: var(--text-muted);
+    font-size: 0.82rem;
+}
+
+.prayer-row .prayer-official,
+.prayer-row .prayer-life {
+    direction: ltr;
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+}
+
+.prayer-row .prayer-life { color: var(--accent-2); }
+
+.prayer-row .prayer-status { font-size: 0.78rem; color: var(--text-muted); }
+.prayer-row .prayer-status.passed { color: var(--text-dim); }
+.prayer-row .prayer-status.current { color: var(--success); font-weight: 700; }
+.prayer-row .prayer-status.upcoming { color: var(--accent); }
+
+.prayer-row.current {
+    background: rgba(250, 143, 63, 0.08);
+}
+
+/* ===== Blog ===== */
+.blog-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+}
+
+.blog-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 20px;
+    transition: border-color 0.2s, transform 0.2s;
+}
+
+.blog-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+}
+
+.blog-card h3 { font-size: 1.05rem; margin-bottom: 8px; }
+.blog-card h3 a { color: var(--text); text-decoration: none; }
+.blog-card h3 a:hover { color: var(--accent); }
+
+.blog-card p {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    line-height: 1.6;
+    margin-bottom: 12px;
+}
+
+.read-more {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.88rem;
+}
+
+/* ===== About ===== */
+.about-list {
+    list-style: none;
+    margin-top: 14px;
+}
+
+.about-list li {
+    padding: 10px 0;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    line-height: 1.7;
+}
+
+.about-list strong { color: var(--text); }
+
+.about-cta {
+    margin-top: 22px;
+    text-align: center;
+}
+
+.btn-primary {
+    display: inline-block;
+    background: var(--accent);
+    color: #000;
+    padding: 12px 24px;
+    border-radius: var(--radius-sm);
+    text-decoration: none;
+    font-weight: 700;
+    transition: transform 0.15s;
+}
+.btn-primary:hover { transform: translateY(-1px); }
+
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text);
+    border: 1px solid var(--border);
+    padding: 8px 14px;
+    border-radius: var(--radius-sm);
+    font-family: inherit;
+    font-size: 0.88rem;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.btn-secondary:hover { background: rgba(255, 255, 255, 0.1); }
+
+#citySearch {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 0.95rem;
+    width: 100%;
+}
+#citySearch:focus { outline: none; border-color: var(--accent); }
+
+/* ===== Footer ===== */
+footer {
+    margin-top: 40px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    color: var(--text-muted);
+    text-align: center;
+    font-size: 0.88rem;
+    line-height: 1.7;
+}
+
+footer a { color: var(--accent); text-decoration: none; }
+.footer-note { color: var(--text-dim); margin-top: 6px; font-size: 0.82rem; }
+
+/* ===== Mobile responsive ===== */
+@media (max-width: 640px) {
+    .nav-links { display: none; }
+    .current-time { font-size: 2.8rem; }
+    .grid-container { grid-template-columns: repeat(3, 1fr); }
+    .converter-grid { grid-template-columns: 1fr; gap: 12px; }
+    .arrow { transform: rotate(90deg); margin: 4px 0; }
+    .diff-display { grid-template-columns: 1fr; gap: 12px; }
+    .prayer-row { grid-template-columns: 1fr 1fr; font-size: 0.85rem; }
+    .prayer-row .prayer-status { grid-column: 1 / -1; }
+    .card { padding: 18px; }
+}
+
+/* ===== Blog post page styles ===== */
+.blog-post {
+    max-width: 740px;
+    margin: 0 auto;
+    padding: 32px 18px 80px;
+}
+
+.blog-post h1 {
+    font-size: 1.9rem;
+    margin-bottom: 12px;
+    color: var(--text);
+    line-height: 1.3;
+}
+
+.blog-post .meta {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-bottom: 28px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+}
+
+.blog-post h2 {
+    font-size: 1.35rem;
+    margin-top: 28px;
+    margin-bottom: 12px;
+    color: var(--text);
+}
+
+.blog-post p {
+    color: var(--text-muted);
+    line-height: 1.85;
+    margin-bottom: 14px;
+    font-size: 1rem;
+}
+
+.blog-post ul,
+.blog-post ol {
+    color: var(--text-muted);
+    line-height: 1.85;
+    margin: 0 22px 18px;
+}
+
+.blog-post li { margin-bottom: 8px; }
+
+.blog-post strong { color: var(--text); }
+
+.blog-post .callout {
+    background: rgba(250, 143, 63, 0.08);
+    border-right: 3px solid var(--accent);
+    padding: 14px 18px;
+    border-radius: var(--radius-sm);
+    margin: 18px 0;
+    color: var(--text);
+    line-height: 1.7;
+}
+
+.blog-post code {
+    background: rgba(255, 255, 255, 0.08);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.9em;
+    direction: ltr;
+    display: inline-block;
+}
+
+.blog-post .back-link {
+    display: inline-block;
+    margin-top: 32px;
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 700;
+}

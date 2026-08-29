@@ -102,7 +102,9 @@
         solarTimes: null,
         prayerTimes: null,
         pendingDetectedCity: null,
-        detectInProgress: false
+        detectInProgress: false,
+        converterFocused: false,  // when true, renderAll won't overwrite converter
+        converterSource: null     // 'official' | 'life' | null (prevents feedback loop)
     };
 
     // ============== Persian digits ==============
@@ -477,8 +479,11 @@
         renderPrayerGrid();
         renderNextPrayer(now);
 
-        document.getElementById('officialInput').value = formatHMS(now, state.city.tz);
-        document.getElementById('lifeInput').value = formatLifeHMS(now, state.city.tz, sunrise);
+        // Converter: only update if user is NOT actively editing
+        if (!state.converterFocused) {
+            updateConverterFromNow(now, sunrise);
+        }
+
         document.getElementById('currentOffset').textContent =
             toPersianDigits(formatOffsetMinutes(lifeOffsetMillis(now, state.city.tz, sunrise) / 60000));
         document.getElementById('sunriseToday').textContent =
@@ -488,6 +493,50 @@
 
         renderDiff(now, sunrise);
         renderPrayerTable(now);
+    }
+
+    /**
+     * Set converter inputs to current official + life clock times.
+     * Called on init and when user clicks "الان" button.
+     */
+    function updateConverterFromNow(now, sunrise) {
+        const officialHMS = formatHM(now, state.city.tz); // "HH:MM"
+        const [oh, om] = officialHMS.split(':');
+        const lifeHM = formatLifeHM(now, state.city.tz, sunrise); // "HH:MM"
+        const [lh, lm] = lifeHM.split(':');
+        setOfficialInputs(oh, om);
+        setLifeInputs(lh, lm);
+    }
+
+    function setOfficialInputs(h, m) {
+        document.getElementById('officialHour').value = pad2(parseInt(h) || 0);
+        document.getElementById('officialMin').value = pad2(parseInt(m) || 0);
+    }
+    function setLifeInputs(h, m) {
+        document.getElementById('lifeHour').value = pad2(parseInt(h) || 0);
+        document.getElementById('lifeMin').value = pad2(parseInt(m) || 0);
+    }
+    function getOfficialInputSec() {
+        const h = parseInt(document.getElementById('officialHour').value) || 0;
+        const m = parseInt(document.getElementById('officialMin').value) || 0;
+        return (h % 24) * 3600 + (m % 60) * 60;
+    }
+    function getLifeInputSec() {
+        const h = parseInt(document.getElementById('lifeHour').value) || 0;
+        const m = parseInt(document.getElementById('lifeMin').value) || 0;
+        return (h % 24) * 3600 + (m % 60) * 60;
+    }
+    function setOfficialInputSec(sec) {
+        sec = ((sec % 86400) + 86400) % 86400;
+        const h = Math.floor(sec / 3600);
+        const m = Math.floor((sec % 3600) / 60);
+        setOfficialInputs(h, m);
+    }
+    function setLifeInputSec(sec) {
+        sec = ((sec % 86400) + 86400) % 86400;
+        const h = Math.floor(sec / 3600);
+        const m = Math.floor((sec % 3600) / 60);
+        setLifeInputs(h, m);
     }
 
     function formatOffsetMinutes(minutes) {
@@ -606,60 +655,127 @@
         });
     }
 
-    // ============== Converter (two-way instant) ==============
-    let converterSource = null;
-
+    // ============== Converter (two-way instant, no time picker) ==============
     function setupConverter() {
-        const officialInput = document.getElementById('officialInput');
-        const lifeInput = document.getElementById('lifeInput');
+        const officialHour = document.getElementById('officialHour');
+        const officialMin = document.getElementById('officialMin');
+        const lifeHour = document.getElementById('lifeHour');
+        const lifeMin = document.getElementById('lifeMin');
+        const swapBtn = document.getElementById('swapBtn');
 
-        officialInput.addEventListener('input', () => {
-            if (converterSource === 'life') return;
-            converterSource = 'official';
-            const val = officialInput.value;
-            if (!val) { converterSource = null; return; }
-            const life = convertInputToLife(val);
-            if (life) lifeInput.value = life;
-            converterSource = null;
+        // Sanitize input: only digits, max 2 chars, clamp to valid range
+        function sanitizeInput(input, max) {
+            return (e) => {
+                let v = input.value.replace(/\D/g, '').slice(0, 2);
+                if (v.length === 2) {
+                    const n = parseInt(v);
+                    if (n > max) v = String(max).padStart(2, '0');
+                }
+                input.value = v;
+            };
+        }
+
+        // On official side change → convert to life
+        function onOfficialChange() {
+            if (state.converterSource === 'life') return;
+            state.converterSource = 'official';
+            const offsetSec = currentLifeOffsetSec();
+            const officialSec = getOfficialInputSec();
+            const lifeSec = ((officialSec + offsetSec) % 86400 + 86400) % 86400;
+            setLifeInputSec(lifeSec);
+            state.converterSource = null;
+        }
+
+        // On life side change → convert to official
+        function onLifeChange() {
+            if (state.converterSource === 'official') return;
+            state.converterSource = 'life';
+            const offsetSec = currentLifeOffsetSec();
+            const lifeSec = getLifeInputSec();
+            const officialSec = ((lifeSec - offsetSec) % 86400 + 86400) % 86400;
+            setOfficialInputSec(officialSec);
+            state.converterSource = null;
+        }
+
+        // Attach input listeners (instant conversion as user types)
+        [officialHour, officialMin].forEach(input => {
+            input.addEventListener('input', sanitizeInput(input, input === officialHour ? 23 : 59));
+            input.addEventListener('input', onOfficialChange);
+            input.addEventListener('focus', () => { state.converterFocused = true; });
+            input.addEventListener('blur', (e) => {
+                // Pad to 2 digits on blur
+                let v = input.value.replace(/\D/g, '');
+                if (v.length === 0) v = '0';
+                if (v.length === 1) v = '0' + v;
+                const max = input === officialHour ? 23 : 59;
+                if (parseInt(v) > max) v = String(max);
+                input.value = v;
+                state.converterFocused = false;
+            });
+            // Auto-advance to next field when 2 digits entered
+            input.addEventListener('input', (e) => {
+                if (input.value.length === 2) {
+                    if (input === officialHour) officialMin.focus();
+                }
+            });
         });
 
-        lifeInput.addEventListener('input', () => {
-            if (converterSource === 'official') return;
-            converterSource = 'life';
-            const val = lifeInput.value;
-            if (!val) { converterSource = null; return; }
-            const official = convertInputToOfficial(val);
-            if (official) officialInput.value = official;
-            converterSource = null;
+        [lifeHour, lifeMin].forEach(input => {
+            input.addEventListener('input', sanitizeInput(input, input === lifeHour ? 23 : 59));
+            input.addEventListener('input', onLifeChange);
+            input.addEventListener('focus', () => { state.converterFocused = true; });
+            input.addEventListener('blur', (e) => {
+                let v = input.value.replace(/\D/g, '');
+                if (v.length === 0) v = '0';
+                if (v.length === 1) v = '0' + v;
+                const max = input === lifeHour ? 23 : 59;
+                if (parseInt(v) > max) v = String(max);
+                input.value = v;
+                state.converterFocused = false;
+            });
+            input.addEventListener('input', (e) => {
+                if (input.value.length === 2) {
+                    if (input === lifeHour) lifeMin.focus();
+                }
+            });
         });
+
+        // "الان" button — reset to current time
+        swapBtn.addEventListener('click', () => {
+            state.converterFocused = false; // allow renderAll to update
+            const now = new Date();
+            const sunrise = lastSunrise(now, state.city.lat, state.city.lon);
+            updateConverterFromNow(now, sunrise);
+            // Visual feedback
+            swapBtn.style.transform = 'scale(0.95)';
+            setTimeout(() => { swapBtn.style.transform = ''; }, 150);
+        });
+
+        // Keyboard: arrow up/down to increment/decrement
+        function setupSpinner(input, max, onChange) {
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    let v = parseInt(input.value) || 0;
+                    v += (e.key === 'ArrowUp') ? 1 : -1;
+                    if (v < 0) v = max;
+                    if (v > max) v = 0;
+                    input.value = pad2(v);
+                    onChange();
+                }
+            });
+        }
+        setupSpinner(officialHour, 23, onOfficialChange);
+        setupSpinner(officialMin, 59, onOfficialChange);
+        setupSpinner(lifeHour, 23, onLifeChange);
+        setupSpinner(lifeMin, 59, onLifeChange);
     }
 
-    function convertInputToLife(officialHMSStr) {
-        if (!state.city) return null;
+    /** Get the current life clock offset (in seconds) for the saved city. */
+    function currentLifeOffsetSec() {
+        if (!state.city) return 0;
         const sunrise = lastSunrise(new Date(), state.city.lat, state.city.lon);
-        const parts = officialHMSStr.split(':').map(p => parseInt(p) || 0);
-        const [h, m, s] = [parts[0] || 0, parts[1] || 0, parts[2] || 0];
-        const officialSec = h * 3600 + m * 60 + s;
-        const offsetSec = lifeOffsetMillis(new Date(), state.city.tz, sunrise) / 1000;
-        const lifeSec = ((officialSec + offsetSec) % 86400 + 86400) % 86400;
-        const lh = Math.floor(lifeSec / 3600);
-        const lm = Math.floor((lifeSec % 3600) / 60);
-        const ls = Math.floor(lifeSec % 60);
-        return `${pad2(lh)}:${pad2(lm)}:${pad2(ls)}`;
-    }
-
-    function convertInputToOfficial(lifeHMSStr) {
-        if (!state.city) return null;
-        const sunrise = lastSunrise(new Date(), state.city.lat, state.city.lon);
-        const parts = lifeHMSStr.split(':').map(p => parseInt(p) || 0);
-        const [h, m, s] = [parts[0] || 0, parts[1] || 0, parts[2] || 0];
-        const lifeSec = h * 3600 + m * 60 + s;
-        const offsetSec = lifeOffsetMillis(new Date(), state.city.tz, sunrise) / 1000;
-        const officialSec = ((lifeSec - offsetSec) % 86400 + 86400) % 86400;
-        const oh = Math.floor(officialSec / 3600);
-        const om = Math.floor((officialSec % 3600) / 60);
-        const os = Math.floor(officialSec % 60);
-        return `${pad2(oh)}:${pad2(om)}:${pad2(os)}`;
+        return lifeOffsetMillis(new Date(), state.city.tz, sunrise) / 1000;
     }
 
     // ============== City picker panel (easy UX) ==============

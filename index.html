@@ -170,23 +170,37 @@
         </section>
 
         <!-- ============ CONVERTER ============ -->
-        <section id="converter" class="card">
+        <section id="converter" class="card converter-section">
             <h2>🔁 مبدل ساعت رسمی ⇄ ساعت زندگی</h2>
-            <p class="hint">زمان فعلی به‌صورت پیش‌فرض پر شده. هر وقت تغییر دادید، در لحظه تبدیل می‌شه.</p>
+            <p class="hint">زمان فعلی پر شده. هر عددی تایپ کنید، در لحظه تبدیل می‌شه.</p>
 
-            <div class="converter-grid">
-                <div class="converter-col">
-                    <label for="officialInput">ساعت رسمی</label>
-                    <input type="time" id="officialInput" step="1" inputmode="numeric">
-                    <p class="sublabel">HH:MM:SS</p>
+            <div class="converter-display">
+                <!-- Left: Official time (black & white) -->
+                <div class="conv-side conv-official">
+                    <div class="conv-label">ساعت رسمی</div>
+                    <div class="conv-input-wrap">
+                        <input type="text" id="officialHour" class="conv-num" inputmode="numeric" maxlength="2" value="00" aria-label="ساعت رسمی - ساعت">
+                        <span class="conv-colon">:</span>
+                        <input type="text" id="officialMin" class="conv-num" inputmode="numeric" maxlength="2" value="00" aria-label="ساعت رسمی - دقیقه">
+                    </div>
+                    <div class="conv-sublabel">به وقت شهر شما</div>
                 </div>
 
-                <div class="arrow">⇄</div>
+                <!-- Center: swap arrow -->
+                <button class="conv-swap" id="swapBtn" aria-label="جابجایی" title="استفاده از زمان فعلی">
+                    <span class="swap-icon">⇄</span>
+                    <span class="swap-text">الان</span>
+                </button>
 
-                <div class="converter-col">
-                    <label for="lifeInput">ساعت زندگی</label>
-                    <input type="time" id="lifeInput" step="1" inputmode="numeric">
-                    <p class="sublabel">HH:MM:SS</p>
+                <!-- Right: Life clock (colored) -->
+                <div class="conv-side conv-life">
+                    <div class="conv-label">ساعت زندگی</div>
+                    <div class="conv-input-wrap">
+                        <input type="text" id="lifeHour" class="conv-num" inputmode="numeric" maxlength="2" value="00" aria-label="ساعت زندگی - ساعت">
+                        <span class="conv-colon">:</span>
+                        <input type="text" id="lifeMin" class="conv-num" inputmode="numeric" maxlength="2" value="00" aria-label="ساعت زندگی - دقیقه">
+                    </div>
+                    <div class="conv-sublabel">بر اساس طلوع امروز</div>
                 </div>
             </div>
 

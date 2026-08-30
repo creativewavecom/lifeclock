@@ -175,18 +175,6 @@
             <p class="hint">زمان فعلی پر شده. هر عددی تایپ کنید، در لحظه تبدیل می‌شه.</p>
 
             <div class="converter-display">
-                <!-- Left: Official time (monochrome theme) -->
-                <div class="conv-side conv-official">
-                    <div class="conv-glyph" aria-hidden="true">🕜</div>
-                    <div class="conv-label">ساعت رسمی</div>
-                    <div class="conv-input-wrap">
-                        <input type="text" id="officialHour" class="conv-num" inputmode="numeric" maxlength="2" value="00" aria-label="ساعت رسمی - ساعت">
-                        <span class="conv-colon">:</span>
-                        <input type="text" id="officialMin" class="conv-num" inputmode="numeric" maxlength="2" value="00" aria-label="ساعت رسمی - دقیقه">
-                    </div>
-                    <div class="conv-sublabel">به وقت شهر شما</div>
-                </div>
-
                 <!-- Right: Life clock (colorful sunrise theme) -->
                 <div class="conv-side conv-life">
                     <div class="conv-glyph" aria-hidden="true">🌅</div>
@@ -197,6 +185,18 @@
                         <input type="text" id="lifeMin" class="conv-num" inputmode="numeric" maxlength="2" value="00" aria-label="ساعت زندگی - دقیقه">
                     </div>
                     <div class="conv-sublabel">بر اساس طلوع امروز</div>
+                </div>
+
+                <!-- Left: Official time (monochrome theme) -->
+                <div class="conv-side conv-official">
+                    <div class="conv-glyph" aria-hidden="true">🕜</div>
+                    <div class="conv-label">ساعت رسمی</div>
+                    <div class="conv-input-wrap">
+                        <input type="text" id="officialHour" class="conv-num" inputmode="numeric" maxlength="2" value="00" aria-label="ساعت رسمی - ساعت">
+                        <span class="conv-colon">:</span>
+                        <input type="text" id="officialMin" class="conv-num" inputmode="numeric" maxlength="2" value="00" aria-label="ساعت رسمی - دقیقه">
+                    </div>
+                    <div class="conv-sublabel">به وقت شهر شما</div>
                 </div>
             </div>
 

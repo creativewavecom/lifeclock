@@ -1,0 +1,62 @@
+<resources>
+    <!-- Base color palette -->
+    <color name="purple_200">#FFBB86FC</color>
+    <color name="purple_500">#FF6200EE</color>
+    <color name="purple_700">#FF3700B3</color>
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="teal_700">#FF018786</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <!-- App theme colors -->
+    <color name="app_background">#FF101014</color>
+    <color name="app_surface">#FF1A1A20</color>
+    <color name="app_primary">#FFFA8F3F</color>
+    <color name="app_on_primary">#FF000000</color>
+    <color name="app_secondary">#FFB0B0B0</color>
+    <color name="app_text_primary">#FFEEEEEE</color>
+    <color name="app_text_secondary">#FFB0B0B0</color>
+
+    <!-- Widget theme: Digital Minimal -->
+    <color name="digital_bg">#FF1A1A1E</color>
+    <color name="digital_text">#FFFFFFFF</color>
+    <color name="digital_accent">#FF00E5FF</color>
+
+    <!-- Widget theme: Analog -->
+    <color name="analog_bg">#FF1F1F23</color>
+    <color name="analog_face">#FF2C2C30</color>
+    <color name="analog_hand">#FFFFFFFF</color>
+    <color name="analog_hour_hand">#FFFA8F3F</color>
+    <color name="analog_minute_hand">#FFEEEEEE</color>
+    <color name="analog_second_hand">#FFFF4081</color>
+
+    <!-- Widget theme: Nature / Sun -->
+    <color name="nature_bg_dawn">#FF3D2C5C</color>
+    <color name="nature_bg_morning">#FFFA8F3F</color>
+    <color name="nature_bg_noon">#FF4FC3F7</color>
+    <color name="nature_bg_dusk">#FF8B4789</color>
+    <color name="nature_bg_night">#FF0D0D2A</color>
+    <color name="nature_text">#FFFFFFFF</color>
+
+    <!-- Widget theme: Persian Traditional -->
+    <color name="persian_bg">#FF1A237E</color>
+    <color name="persian_text">#FFF4D03F</color>
+    <color name="persian_accent">#FFD4AC0D</color>
+    <color name="persian_border">#FFF4D03F</color>
+
+    <!-- Widget theme: Glass Dark -->
+    <color name="glass_bg">#99000000</color>
+    <color name="glass_text">#FFFFFFFF</color>
+    <color name="glass_accent">#80FFFFFF</color>
+
+    <!-- Widget theme: Modern Gradient -->
+    <color name="gradient_start">#FF6A11CB</color>
+    <color name="gradient_end">#FF2575FC</color>
+    <color name="gradient_text">#FFFFFFFF</color>
+    <color name="gradient_accent">#FFFFD700</color>
+
+    <!-- Common widget colors -->
+    <color name="transparent">#00000000</color>
+    <color name="semi_transparent_black">#99000000</color>
+    <color name="widget_label">#99FFFFFF</color>
+</resources>

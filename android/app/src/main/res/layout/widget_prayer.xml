@@ -1,0 +1,351 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Prayer widget layout (4x3 — compact, dense, organized)
+  - Top row: 5 prayer times (Fajr, Sunrise, Dhuhr, Asr, Maghrib, Isha)
+  - Middle row: Life clock big + official time + city name
+  - Bottom row: Persian date + Gregorian date + day progress bar
+  - Refresh button at top-right
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/bg_widget_digital"
+    android:padding="14dp">
+
+    <!-- ===== Top: city + refresh button ===== -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/widget_city"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textColor="@color/widget_label"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:ellipsize="end"
+            android:maxLines="1"
+            tools:text="TEHRAN" />
+
+        <TextView
+            android:id="@+id/widget_refresh_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="↻"
+            android:textColor="@color/digital_accent"
+            android:textSize="16sp"
+            android:padding="4dp" />
+    </LinearLayout>
+
+    <!-- ===== Prayer times row ===== -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:orientation="horizontal"
+        android:weightSum="5">
+
+        <!-- Fajr -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/prayer_fajr"
+                android:textColor="@color/widget_label"
+                android:textSize="8sp"
+                android:alpha="0.7" />
+
+            <TextView
+                android:id="@+id/widget_fajr"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/digital_text"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                tools:text="04:57" />
+        </LinearLayout>
+
+        <!-- Sunrise -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/prayer_sunrise"
+                android:textColor="@color/widget_label"
+                android:textSize="8sp"
+                android:alpha="0.7" />
+
+            <TextView
+                android:id="@+id/widget_sunrise"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/digital_text"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                tools:text="06:21" />
+        </LinearLayout>
+
+        <!-- Dhuhr -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/prayer_dhuhr"
+                android:textColor="@color/widget_label"
+                android:textSize="8sp"
+                android:alpha="0.7" />
+
+            <TextView
+                android:id="@+id/widget_dhuhr"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/digital_text"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                tools:text="12:21" />
+        </LinearLayout>
+
+        <!-- Asr -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/prayer_asr"
+                android:textColor="@color/widget_label"
+                android:textSize="8sp"
+                android:alpha="0.7" />
+
+            <TextView
+                android:id="@+id/widget_asr"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/digital_text"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                tools:text="15:45" />
+        </LinearLayout>
+
+        <!-- Maghrib (sunset) -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/prayer_maghrib"
+                android:textColor="@color/widget_label"
+                android:textSize="8sp"
+                android:alpha="0.7" />
+
+            <TextView
+                android:id="@+id/widget_sunset"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/digital_text"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                tools:text="18:23" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Isha row (full width) -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginTop="4dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/prayer_isha"
+            android:textColor="@color/widget_label"
+            android:textSize="9sp"
+            android:alpha="0.7" />
+
+        <TextView
+            android:id="@+id/widget_isha"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="6dp"
+            android:textColor="@color/digital_text"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            tools:text="19:43" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1"
+            android:background="@color/widget_label"
+            android:alpha="0.2"
+            android:layout_marginHorizontal="8dp" />
+
+        <TextView
+            android:id="@+id/widget_next_prayer_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/digital_accent"
+            android:textSize="9sp"
+            android:textStyle="bold"
+            tools:text="→ Dhuhr 02:34" />
+    </LinearLayout>
+
+    <!-- ===== Middle: Life clock big + official time ===== -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginTop="6dp">
+
+        <!-- Life clock -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="start">
+
+            <TextClock
+                android:id="@+id/widget_life_clock"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:format12Hour="HH:mm"
+                android:format24Hour="HH:mm"
+                android:textColor="@color/digital_text"
+                android:textSize="40sp"
+                android:textStyle="bold"
+                android:fontFamily="sans-serif-light"
+                tools:text="12:13" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="-4dp"
+                android:text="@string/life_clock"
+                android:textColor="@color/widget_label"
+                android:textSize="9sp"
+                android:letterSpacing="0.1" />
+        </LinearLayout>
+
+        <!-- Official time -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="end">
+
+            <TextClock
+                android:id="@+id/widget_official_clock"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:format12Hour="HH:mm"
+                android:format24Hour="HH:mm"
+                android:textColor="@color/digital_accent"
+                android:textSize="20sp"
+                android:fontFamily="sans-serif-medium"
+                tools:text="08:10" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="-2dp"
+                android:text="@string/official_time"
+                android:textColor="@color/widget_label"
+                android:textSize="8sp"
+                android:letterSpacing="0.1" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Day progress bar -->
+    <ProgressBar
+        android:id="@+id/widget_progress"
+        style="?android:progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="3dp"
+        android:max="1000"
+        android:progress="450"
+        android:progressTint="@color/digital_accent"
+        android:progressBackgroundTint="@color/widget_label" />
+
+    <!-- ===== Bottom: dates row ===== -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/widget_persian_date"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textColor="@color/widget_label"
+            android:textSize="10sp"
+            tools:text="شنبه ۱۴ مرداد ۱۴۰۳" />
+
+        <TextView
+            android:id="@+id/widget_gregorian_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/widget_label"
+            android:textSize="10sp"
+            android:alpha="0.7"
+            tools:text="2024-08-04" />
+    </LinearLayout>
+
+    <!-- Hidden period text — the renderer always sets this ID, so we provide
+         an invisible slot on layouts that don't visually show it. -->
+    <TextView
+        android:id="@+id/widget_period"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone" />
+
+    <!-- Hidden day-length slot — same rationale. -->
+    <TextView
+        android:id="@+id/widget_day_length"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone" />
+
+</LinearLayout>

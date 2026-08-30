@@ -661,7 +661,6 @@
         const officialMin = document.getElementById('officialMin');
         const lifeHour = document.getElementById('lifeHour');
         const lifeMin = document.getElementById('lifeMin');
-        const swapBtn = document.getElementById('swapBtn');
 
         // Sanitize input: only digits, max 2 chars, clamp to valid range
         function sanitizeInput(input, max) {
@@ -703,7 +702,6 @@
             input.addEventListener('input', onOfficialChange);
             input.addEventListener('focus', () => { state.converterFocused = true; });
             input.addEventListener('blur', (e) => {
-                // Pad to 2 digits on blur
                 let v = input.value.replace(/\D/g, '');
                 if (v.length === 0) v = '0';
                 if (v.length === 1) v = '0' + v;
@@ -712,10 +710,9 @@
                 input.value = v;
                 state.converterFocused = false;
             });
-            // Auto-advance to next field when 2 digits entered
             input.addEventListener('input', (e) => {
-                if (input.value.length === 2) {
-                    if (input === officialHour) officialMin.focus();
+                if (input.value.length === 2 && input === officialHour) {
+                    officialMin.focus();
                 }
             });
         });
@@ -734,21 +731,10 @@
                 state.converterFocused = false;
             });
             input.addEventListener('input', (e) => {
-                if (input.value.length === 2) {
-                    if (input === lifeHour) lifeMin.focus();
+                if (input.value.length === 2 && input === lifeHour) {
+                    lifeMin.focus();
                 }
             });
-        });
-
-        // "الان" button — reset to current time
-        swapBtn.addEventListener('click', () => {
-            state.converterFocused = false; // allow renderAll to update
-            const now = new Date();
-            const sunrise = lastSunrise(now, state.city.lat, state.city.lon);
-            updateConverterFromNow(now, sunrise);
-            // Visual feedback
-            swapBtn.style.transform = 'scale(0.95)';
-            setTimeout(() => { swapBtn.style.transform = ''; }, 150);
         });
 
         // Keyboard: arrow up/down to increment/decrement

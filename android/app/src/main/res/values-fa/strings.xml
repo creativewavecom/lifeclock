@@ -1,0 +1,97 @@
+<resources>
+    <!-- App -->
+    <string name="app_name">ساعت زندگی</string>
+
+    <!-- Widget labels -->
+    <string name="widget_small_label">ساعت زندگی (کوچک)</string>
+    <string name="widget_wide_label">ساعت زندگی (نوار)</string>
+    <string name="widget_medium_label">ساعت زندگی (متوسط)</string>
+    <string name="widget_large_label">ساعت زندگی (بزرگ)</string>
+    <string name="widget_prayer_label">ساعت زندگی (شرعی)</string>
+
+    <!-- Common -->
+    <string name="life_clock">ساعت زندگی</string>
+    <string name="official_time">ساعت رسمی</string>
+    <string name="sunrise">طلوع</string>
+    <string name="sunset">غروب</string>
+    <string name="day_progress">پیشرفت روز</string>
+    <string name="day_length">طول روز</string>
+    <string name="persian_date">تاریخ شمسی</string>
+
+    <!-- Prayer times -->
+    <string name="prayer_fajr">اذان صبح</string>
+    <string name="prayer_sunrise">طلوع آفتاب</string>
+    <string name="prayer_dhuhr">اذان ظهر</string>
+    <string name="prayer_asr">اذان عصر</string>
+    <string name="prayer_maghrib">اذان مغرب</string>
+    <string name="prayer_isha">اذان عشاء</string>
+    <string name="prayer_times">اوقات شرعی</string>
+    <string name="next_prayer">اذان بعدی</string>
+    <string name="refresh_now">به‌روزرسانی</string>
+
+    <!-- Home screen -->
+    <string name="home_title">ساعت زندگی</string>
+    <string name="add_city">افزودن شهر</string>
+    <string name="settings">تنظیمات</string>
+    <string name="no_cities_yet">هنوز شهری اضافه نشده. روی + بزنید.</string>
+
+    <!-- Cities -->
+    <string name="cities_title">شهرها</string>
+    <string name="city_name">نام شهر</string>
+    <string name="timezone">منطقه زمانی</string>
+    <string name="latitude">عرض جغرافیایی</string>
+    <string name="longitude">طول جغرافیایی</string>
+    <string name="add">افزودن</string>
+    <string name="cancel">انصراف</string>
+    <string name="save">ذخیره</string>
+    <string name="delete">حذف</string>
+    <string name="use_current_location">استفاده از موقعیت فعلی</string>
+    <string name="select_city">انتخاب شهر</string>
+    <string name="preset_cities">شهرهای پیش‌فرض</string>
+
+    <!-- Settings -->
+    <string name="settings_title">تنظیمات</string>
+    <string name="appearance">ظاهر</string>
+    <string name="widget_theme">تم ویجت</string>
+    <string name="notification_settings">نوتیفیکیشن</string>
+    <string name="enable_notification">نوتیفیکیشن دائمی</string>
+    <string name="enable_notification_summary">نمایش ساعت زندگی در نوار وضعیت</string>
+    <string name="language">زبان</string>
+    <string name="language_english">English</string>
+    <string name="language_persian">فارسی</string>
+    <string name="language_system">پیش‌فرض سیستم</string>
+    <string name="update_frequency">دوره به‌روزرسانی</string>
+    <string name="update_30s">هر ۳۰ ثانیه</string>
+    <string name="update_1m">هر ۱ دقیقه</string>
+    <string name="update_5m">هر ۵ دقیقه (صرفه‌جویی باتری)</string>
+    <string name="sunrise_source">منبع داده طلوع</string>
+    <string name="sunrise_offline">آفلاین (فرمول NOAA)</string>
+    <string name="sunrise_api">آنلاین (sunrise-sunset.org)</string>
+    <string name="sunrise_hybrid">ترکیبی (آفلاین + همگام‌سازی هفتگی)</string>
+
+    <!-- Themes -->
+    <string name="theme_digital_minimal">دیجیتال مینیمال</string>
+    <string name="theme_analog">آنالوگ</string>
+    <string name="theme_nature">طبیعت / خورشید</string>
+    <string name="theme_persian_traditional">سنتی ایرانی</string>
+    <string name="theme_glass_dark">تیره شیشه‌ای</string>
+    <string name="theme_modern_gradient">مدرن گرادیانی</string>
+
+    <!-- Notification -->
+    <string name="notification_channel_name">ساعت زندگی</string>
+    <string name="notification_channel_description">ساعت زندگی فعلی را نمایش می‌دهد</string>
+    <string name="notification_text_format">ساعت زندگی: %1$s</string>
+
+    <!-- Permissions -->
+    <string name="location_permission_rationale">برای تشخیص خودکار شهر شما، اجازه موقعیت لازم است. همچنین می‌توانید شهرها را دستی اضافه کنید.</string>
+    <string name="grant_permission">اعطای اجازه</string>
+    <string name="permission_denied">اجازه موقعیت داده نشد. همچنان می‌توانید شهرها را دستی اضافه کنید.</string>
+    <string name="notification_permission_rationale">برای نمایش ساعت زندگی در نوار اعلان‌ها، اجازه نوتیفیکیشن لازم است.</string>
+
+    <!-- Errors -->
+    <string name="location_unavailable">موقعیت در دسترس نیست. لطفاً یک شهر دستی اضافه کنید.</string>
+    <string name="network_error">خطای شبکه. از داده آفلاین استفاده می‌شود.</string>
+
+    <!-- Boot -->
+    <string name="boot_started">سرویس ساعت زندگی آغاز شد</string>
+</resources>

@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Medium widget layout (4x2)
+  - Life clock + official time + city + period + sunrise/sunset + day progress.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/bg_widget_digital"
+    android:padding="16dp">
+
+    <!-- Top row: city + official time -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/widget_city"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textColor="@color/widget_label"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:ellipsize="end"
+            android:maxLines="1"
+            tools:text="TEHRAN" />
+
+        <TextClock
+            android:id="@+id/widget_official_clock"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:format12Hour="HH:mm"
+            android:format24Hour="HH:mm"
+            android:textColor="@color/digital_accent"
+            android:textSize="14sp"
+            android:fontFamily="sans-serif-medium"
+            tools:text="09:45" />
+    </LinearLayout>
+
+    <!-- Middle: Life clock big -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:gravity="center">
+
+        <TextClock
+            android:id="@+id/widget_life_clock"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:format12Hour="HH:mm"
+            android:format24Hour="HH:mm"
+            android:textColor="@color/digital_text"
+            android:textSize="56sp"
+            android:textStyle="bold"
+            android:fontFamily="sans-serif-light"
+            tools:text="06:45" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="-2dp"
+            android:text="@string/life_clock"
+            android:textColor="@color/widget_label"
+            android:textSize="10sp"
+            android:letterSpacing="0.15" />
+    </LinearLayout>
+
+    <!-- Day progress bar -->
+    <ProgressBar
+        android:id="@+id/widget_progress"
+        style="?android:progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="4dp"
+        android:max="1000"
+        android:progress="450"
+        android:progressTint="@color/digital_accent"
+        android:progressBackgroundTint="@color/widget_label" />
+
+    <!-- Bottom row: sunrise/sunset -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <!-- Sunrise -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="▲"
+                android:textColor="@color/digital_accent"
+                android:textSize="10sp"
+                android:layout_marginEnd="4dp" />
+
+            <TextView
+                android:id="@+id/widget_sunrise"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/widget_label"
+                android:textSize="11sp"
+                tools:text="05:42" />
+        </LinearLayout>
+
+        <!-- Progress percent -->
+        <TextView
+            android:id="@+id/widget_progress_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/digital_text"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            tools:text="45%" />
+
+        <!-- Sunset -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="horizontal"
+            android:gravity="center_vertical|end">
+
+            <TextView
+                android:id="@+id/widget_sunset"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/widget_label"
+                android:textSize="11sp"
+                tools:text="18:23" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="▼"
+                android:textColor="@color/digital_accent"
+                android:textSize="10sp"
+                android:layout_marginStart="4dp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Hidden period text — the renderer always sets this ID, so we provide
+         an invisible slot on layouts that don't visually show it. -->
+    <TextView
+        android:id="@+id/widget_period"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone" />
+
+    <!-- Other hidden slots for IDs the renderer always touches. -->
+    <TextView
+        android:id="@+id/widget_persian_date"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/widget_day_length"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone" />
+
+</LinearLayout>

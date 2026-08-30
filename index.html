@@ -175,8 +175,9 @@
             <p class="hint">زمان فعلی پر شده. هر عددی تایپ کنید، در لحظه تبدیل می‌شه.</p>
 
             <div class="converter-display">
-                <!-- Left: Official time (black & white) -->
+                <!-- Left: Official time (monochrome theme) -->
                 <div class="conv-side conv-official">
+                    <div class="conv-glyph" aria-hidden="true">🕜</div>
                     <div class="conv-label">ساعت رسمی</div>
                     <div class="conv-input-wrap">
                         <input type="text" id="officialHour" class="conv-num" inputmode="numeric" maxlength="2" value="00" aria-label="ساعت رسمی - ساعت">
@@ -186,14 +187,9 @@
                     <div class="conv-sublabel">به وقت شهر شما</div>
                 </div>
 
-                <!-- Center: swap arrow -->
-                <button class="conv-swap" id="swapBtn" aria-label="جابجایی" title="استفاده از زمان فعلی">
-                    <span class="swap-icon">⇄</span>
-                    <span class="swap-text">الان</span>
-                </button>
-
-                <!-- Right: Life clock (colored) -->
+                <!-- Right: Life clock (colorful sunrise theme) -->
                 <div class="conv-side conv-life">
+                    <div class="conv-glyph" aria-hidden="true">🌅</div>
                     <div class="conv-label">ساعت زندگی</div>
                     <div class="conv-input-wrap">
                         <input type="text" id="lifeHour" class="conv-num" inputmode="numeric" maxlength="2" value="00" aria-label="ساعت زندگی - ساعت">
@@ -211,81 +207,91 @@
             </div>
         </section>
 
-        <!-- ============ TIME DIFF ============ -->
-        <section id="diff" class="card">
-            <h2>⏱ اختلاف زمانی</h2>
-            <p class="hint">اختلاف هر روز با طلوع آفتاب تغییر می‌کنه — در تابستان کمتر، در زمستان بیشتر.</p>
+        <!-- ============ TIME DIFF (collapsible) ============ -->
+        <details id="diff" class="card collapsible">
+            <summary class="collapsible-header">
+                <h2>⏱ اختلاف زمانی</h2>
+                <span class="chevron" aria-hidden="true">▼</span>
+            </summary>
+            <div class="collapsible-body">
+                <p class="hint">اختلاف هر روز با طلوع آفتاب تغییر می‌کنه — در تابستان کمتر، در زمستان بیشتر.</p>
 
-            <div class="diff-display">
-                <div class="diff-card life">
-                    <span class="diff-label">ساعت زندگی</span>
-                    <span class="diff-time" id="diffLifeTime">--:--</span>
+                <div class="diff-display">
+                    <div class="diff-card life">
+                        <span class="diff-label">ساعت زندگی</span>
+                        <span class="diff-time" id="diffLifeTime">--:--</span>
+                    </div>
+                    <div class="diff-arrow">
+                        <span class="diff-number" id="diffNumber">—</span>
+                        <span class="diff-unit">دقیقه</span>
+                    </div>
+                    <div class="diff-card official">
+                        <span class="diff-label">ساعت رسمی</span>
+                        <span class="diff-time" id="diffOfficialTime">--:--</span>
+                    </div>
                 </div>
-                <div class="diff-arrow">
-                    <span class="diff-number" id="diffNumber">—</span>
-                    <span class="diff-unit">دقیقه</span>
-                </div>
-                <div class="diff-card official">
-                    <span class="diff-label">ساعت رسمی</span>
-                    <span class="diff-time" id="diffOfficialTime">--:--</span>
+
+                <div class="diff-explanation" id="diffExplanation">
+                    <p>در حال محاسبه...</p>
                 </div>
             </div>
+        </details>
 
-            <div class="diff-explanation" id="diffExplanation">
-                <p>در حال محاسبه...</p>
+        <!-- ============ PRAYER TABLE (collapsible) ============ -->
+        <details id="prayer" class="card collapsible">
+            <summary class="collapsible-header">
+                <h2>🕌 اوقات شرعی به همراه ساعت زندگی</h2>
+                <span class="chevron" aria-hidden="true">▼</span>
+            </summary>
+            <div class="collapsible-body">
+                <p class="hint">اوقات شرعی شهرتون به همراه معادل ساعت زندگی هر کدوم.</p>
+
+                <div class="prayer-table">
+                    <div class="prayer-row header">
+                        <div>نام</div>
+                        <div>رسمی</div>
+                        <div>زندگی</div>
+                        <div>وضعیت</div>
+                    </div>
+                    <div class="prayer-row" data-prayer="fajr">
+                        <div>اذان صبح</div>
+                        <div class="prayer-official">—</div>
+                        <div class="prayer-life">—</div>
+                        <div class="prayer-status">—</div>
+                    </div>
+                    <div class="prayer-row" data-prayer="sunrise">
+                        <div>طلوع</div>
+                        <div class="prayer-official">—</div>
+                        <div class="prayer-life">—</div>
+                        <div class="prayer-status">—</div>
+                    </div>
+                    <div class="prayer-row" data-prayer="dhuhr">
+                        <div>اذان ظهر</div>
+                        <div class="prayer-official">—</div>
+                        <div class="prayer-life">—</div>
+                        <div class="prayer-status">—</div>
+                    </div>
+                    <div class="prayer-row" data-prayer="asr">
+                        <div>اذان عصر</div>
+                        <div class="prayer-official">—</div>
+                        <div class="prayer-life">—</div>
+                        <div class="prayer-status">—</div>
+                    </div>
+                    <div class="prayer-row" data-prayer="maghrib">
+                        <div>اذان مغرب</div>
+                        <div class="prayer-official">—</div>
+                        <div class="prayer-life">—</div>
+                        <div class="prayer-status">—</div>
+                    </div>
+                    <div class="prayer-row" data-prayer="isha">
+                        <div>اذان عشاء</div>
+                        <div class="prayer-official">—</div>
+                        <div class="prayer-life">—</div>
+                        <div class="prayer-status">—</div>
+                    </div>
+                </div>
             </div>
-        </section>
-
-        <!-- ============ PRAYER TABLE ============ -->
-        <section id="prayer" class="card">
-            <h2>🕌 اوقات شرعی به همراه ساعت زندگی</h2>
-            <p class="hint">اوقات شرعی شهرتون به همراه معادل ساعت زندگی هر کدوم.</p>
-
-            <div class="prayer-table">
-                <div class="prayer-row header">
-                    <div>نام</div>
-                    <div>رسمی</div>
-                    <div>زندگی</div>
-                    <div>وضعیت</div>
-                </div>
-                <div class="prayer-row" data-prayer="fajr">
-                    <div>اذان صبح</div>
-                    <div class="prayer-official">—</div>
-                    <div class="prayer-life">—</div>
-                    <div class="prayer-status">—</div>
-                </div>
-                <div class="prayer-row" data-prayer="sunrise">
-                    <div>طلوع</div>
-                    <div class="prayer-official">—</div>
-                    <div class="prayer-life">—</div>
-                    <div class="prayer-status">—</div>
-                </div>
-                <div class="prayer-row" data-prayer="dhuhr">
-                    <div>اذان ظهر</div>
-                    <div class="prayer-official">—</div>
-                    <div class="prayer-life">—</div>
-                    <div class="prayer-status">—</div>
-                </div>
-                <div class="prayer-row" data-prayer="asr">
-                    <div>اذان عصر</div>
-                    <div class="prayer-official">—</div>
-                    <div class="prayer-life">—</div>
-                    <div class="prayer-status">—</div>
-                </div>
-                <div class="prayer-row" data-prayer="maghrib">
-                    <div>اذان مغرب</div>
-                    <div class="prayer-official">—</div>
-                    <div class="prayer-life">—</div>
-                    <div class="prayer-status">—</div>
-                </div>
-                <div class="prayer-row" data-prayer="isha">
-                    <div>اذان عشاء</div>
-                    <div class="prayer-official">—</div>
-                    <div class="prayer-life">—</div>
-                    <div class="prayer-status">—</div>
-                </div>
-            </div>
-        </section>
+        </details>
 
         <!-- ============ BLOG ============ -->
         <section id="blog" class="card">
@@ -331,10 +337,22 @@
             </div>
         </section>
 
-        <!-- ============ ABOUT ============ -->
+        <!-- ============ ABOUT + DOWNLOAD ============ -->
         <section id="about" class="card">
             <h2>ℹ️ درباره ساعت زندگی</h2>
             <p>این پروژه یک ابزار آزاد و آفلاین برای نمایش «ساعت زندگی» است — تعریف شده به‌عنوان ساعت ۹ صبح = طلوع آفتاب واقعی شهر شما. تمام محاسبات بدون نیاز به سرور و با فرمول NOAA انجام می‌شود.</p>
+
+            <div class="download-section">
+                <h3>📲 دانلود اپ اندروید</h3>
+                <p class="download-hint">نسخه نصبی اندروید (APK) رو مستقیم دانلود کنید — بدون نیاز به Google Play.</p>
+                <a href="downloads/lifeclock-release.apk" class="download-btn" download>
+                    <span class="download-icon">⬇</span>
+                    <span class="download-text">دانلود APK</span>
+                    <span class="download-size" id="apkSize">~۳ مگابایت</span>
+                </a>
+                <p class="download-note">برای نصب، اجازه «نصب از منابع ناشناس» رو به مرورگرتون بدید.</p>
+            </div>
+
             <ul class="about-list">
                 <li>🌍 <strong>کاملاً آفلاین</strong> — هیچ سرور یا API پولی لازم نیست</li>
                 <li>🔒 <strong>حفظ حریم خصوصی</strong> — لوکیشن فقط برای تشخیص اولیه شهر استفاده می‌شه</li>

@@ -1,0 +1,18 @@
+# Gradle / Build
+.gradle/
+build/
+local.properties
+*.iml
+.idea/
+.DS_Store
+captures/
+.cxx/
+
+# Keystore (DO NOT COMMIT — stored as GitHub secret)
+*.keystore
+*.jks
+
+# APK/AAB
+*.apk
+*.aab
+lifeclock-release.keystore

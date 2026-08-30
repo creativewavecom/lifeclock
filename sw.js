@@ -1,7 +1,7 @@
 // Life Clock Service Worker
 // Caches the entire app shell for offline use.
 
-const CACHE_VERSION = 7;
+const CACHE_VERSION = 8;
 const CACHE_NAME = `lifeclock-v${CACHE_VERSION}`;
 
 const ASSETS_TO_CACHE = [
@@ -23,6 +23,8 @@ const ASSETS_TO_CACHE = [
     './blog/sun-time-vs-clock-time.html',
     './blog/prayer-times-and-life-clock.html',
     './blog/implementing-offline.html'
+    // NOTE: APK is intentionally NOT cached — it's a large binary that should
+    // always be downloaded fresh.
 ];
 
 // Install: pre-cache the app shell

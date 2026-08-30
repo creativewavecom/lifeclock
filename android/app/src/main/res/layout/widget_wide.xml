@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Wide widget layout (4x1)
+  - A horizontal bar: city | life clock | official time.
+  - Good for the top of the home screen.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    android:background="@drawable/bg_widget_digital"
+    android:padding="12dp"
+    android:gravity="center_vertical">
+
+    <!-- City name -->
+    <TextView
+        android:id="@+id/widget_city"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:textColor="@color/widget_label"
+        android:textSize="13sp"
+        android:textStyle="bold"
+        android:ellipsize="end"
+        android:maxLines="1"
+        tools:text="TEHRAN" />
+
+    <!-- Divider -->
+    <View
+        android:layout_width="1dp"
+        android:layout_height="20dp"
+        android:layout_marginHorizontal="12dp"
+        android:background="@color/digital_accent"
+        android:alpha="0.4" />
+
+    <!-- Life clock -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center">
+
+        <TextClock
+            android:id="@+id/widget_life_clock"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:format12Hour="HH:mm"
+            android:format24Hour="HH:mm"
+            android:textColor="@color/digital_text"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:fontFamily="sans-serif-light"
+            tools:text="06:45" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="-4dp"
+            android:text="@string/life_clock"
+            android:textColor="@color/widget_label"
+            android:textSize="9sp"
+            android:letterSpacing="0.1" />
+    </LinearLayout>
+
+    <!-- Divider -->
+    <View
+        android:layout_width="1dp"
+        android:layout_height="20dp"
+        android:layout_marginHorizontal="12dp"
+        android:background="@color/digital_accent"
+        android:alpha="0.4" />
+
+    <!-- Official time -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center">
+
+        <TextClock
+            android:id="@+id/widget_official_clock"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:format12Hour="HH:mm"
+            android:format24Hour="HH:mm"
+            android:textColor="@color/digital_accent"
+            android:textSize="18sp"
+            android:fontFamily="sans-serif-medium"
+            tools:text="09:45" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="-4dp"
+            android:text="@string/official_time"
+            android:textColor="@color/widget_label"
+            android:textSize="9sp"
+            android:letterSpacing="0.1" />
+    </LinearLayout>
+
+    <!-- Hidden period text — the renderer always sets this ID, so we provide
+         an invisible slot on layouts that don't visually show it. -->
+    <TextView
+        android:id="@+id/widget_period"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone" />
+
+    <!-- Other hidden slots for IDs the renderer always touches. -->
+    <TextView
+        android:id="@+id/widget_sunrise"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/widget_sunset"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/widget_progress_text"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/widget_persian_date"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/widget_day_length"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone" />
+
+</LinearLayout>

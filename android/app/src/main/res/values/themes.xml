@@ -1,0 +1,46 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme (uses AppCompat since the UI is all Compose) -->
+    <style name="Theme.LifeClock" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:statusBarColor" tools:targetApi="l">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowBackground">@color/app_background</item>
+    </style>
+
+    <!-- Widget themes - applied to RemoteViews root layouts -->
+    <style name="WidgetTheme.Digital" parent="android:Widget">
+        <item name="android:background">@drawable/bg_widget_digital</item>
+        <item name="android:textColor">@color/digital_text</item>
+        <item name="android:padding">16dp</item>
+    </style>
+
+    <style name="WidgetTheme.Glass" parent="android:Widget">
+        <item name="android:background">@drawable/bg_widget_glass</item>
+        <item name="android:textColor">@color/glass_text</item>
+        <item name="android:padding">16dp</item>
+    </style>
+
+    <style name="WidgetTheme.Persian" parent="android:Widget">
+        <item name="android:background">@drawable/bg_widget_persian</item>
+        <item name="android:textColor">@color/persian_text</item>
+        <item name="android:padding">16dp</item>
+    </style>
+
+    <style name="WidgetTheme.Gradient" parent="android:Widget">
+        <item name="android:background">@drawable/bg_widget_gradient</item>
+        <item name="android:textColor">@color/gradient_text</item>
+        <item name="android:padding">16dp</item>
+    </style>
+
+    <style name="WidgetTheme.Nature" parent="android:Widget">
+        <item name="android:background">@drawable/bg_widget_nature</item>
+        <item name="android:textColor">@color/nature_text</item>
+        <item name="android:padding">16dp</item>
+    </style>
+
+    <style name="WidgetTheme.Analog" parent="android:Widget">
+        <item name="android:background">@drawable/bg_widget_analog</item>
+        <item name="android:textColor">@color/analog_hand</item>
+        <item name="android:padding">16dp</item>
+    </style>
+</resources>

@@ -19,8 +19,8 @@
     const SUNRISE_LIFE_HOUR = 9;
     const SUNRISE_LIFE_SECONDS = SUNRISE_LIFE_HOUR * 3600;
     const ZENITH_OFFICIAL = 90.833;
-    const ZENITH_FAJR = 108.0;
-    const ZENITH_ISHA = 107.0;
+    const ZENITH_FAJR = 107.7;  // Shia: sun 17.7° below horizon
+    const ZENITH_ISHA = 104.0;  // Shia: sun 14° below horizon (Iranian convention)
     const STORAGE_KEY = 'lifeclock.city';
     const THEME_KEY = 'lifeclock.theme';
     const DETECT_REJECTED_KEY = 'lifeclock.detectRejected';
@@ -205,8 +205,10 @@
         const fajrMin = minutesForZenith(ZENITH_FAJR, +1);
         const ishaMin = minutesForZenith(ZENITH_ISHA, -1);
 
+        // Asr (Shia/Shafi'i shadow factor = 1):
+        // tan(altitude) = 1 / (1 + tan(|lat - decl|))
         const latRad = (Math.PI / 180) * lat;
-        const asrAlt = Math.atan(1 + Math.tan(Math.abs(latRad - decl)));
+        const asrAlt = Math.atan(1 / (1 + Math.tan(Math.abs(latRad - decl))));
         const cosHAsr = (Math.sin(-asrAlt) - Math.sin(latRad) * Math.sin(decl)) /
             (Math.cos(latRad) * Math.cos(decl));
         let asrMin = NaN;

@@ -26,15 +26,16 @@
     <meta property="og:url" content="https://creativewavecom.github.io/lifeclock/">
     <meta property="og:site_name" content="ساعت زندگی">
     <meta property="og:locale" content="fa_IR">
-    <meta property="og:image" content="https://creativewavecom.github.io/lifeclock/assets/img/icon-512.png">
-    <meta property="og:image:width" content="512">
-    <meta property="og:image:height" content="512">
+    <meta property="og:image" content="https://creativewavecom.github.io/lifeclock/assets/img/og-image.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="ساعت زندگی — ساعتی که مناسب زندگی است و ساعت ۹ صبح آن همیشه طلوع آفتاب است">
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="ساعت زندگی | Life Clock">
     <meta name="twitter:description" content="ساعتی که مناسب زندگی است و ساعت ۹ صبح آن همیشه طلوع آفتاب است.">
-    <meta name="twitter:image" content="https://creativewavecom.github.io/lifeclock/assets/img/icon-512.png">
+    <meta name="twitter:image" content="https://creativewavecom.github.io/lifeclock/assets/img/og-image.png">
 
     <title>ساعت زندگی | Life Clock — مبدل، اوقات شرعی، اختلاف زمانی</title>
 
@@ -388,5 +389,17 @@
     </div>
 
     <script src="assets/js/app.js" defer></script>
+
+    <!-- Google Analytics (GA4) — replace G-XXXXXXXXXX with your actual Measurement ID -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-XXXXXXXXXX', {
+            'anonymize_ip': true,
+            'page_title': document.title
+        });
+    </script>
 </body>
 </html>

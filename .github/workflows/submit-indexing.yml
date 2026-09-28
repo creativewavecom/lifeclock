@@ -1,9 +1,15 @@
 name: Submit URLs to Google Indexing API
 
 on:
-  schedule:
-    # Run every day at 6 AM UTC (9:30 AM Tehran time)
-    - cron: '0 6 * * *'
+  # Only run when blog content changes (not every day)
+  push:
+    branches: [main]
+    paths:
+      - 'blog/**'
+      - 'index.html'
+      - 'faq.html'
+      - 'about.html'
+      - 'sitemap.xml'
   workflow_dispatch:
 
 jobs:
@@ -20,101 +26,92 @@ jobs:
       - name: Install dependencies
         run: pip install google-auth google-api-python-client
       
-      - name: Create service account key
-        run: |
-          echo '${{ secrets.KEYSTORE_BASE64 }}' | base64 -d > /tmp/key.json
-          # Wait, that's the keystore. We need a different secret.
-          # Let's use a dedicated secret for the GSC service account.
-      
-      - name: Submit URLs to Indexing API
+      - name: Submit changed URLs to Indexing API
         env:
           GSC_KEY: ${{ secrets.GSC_SERVICE_ACCOUNT_KEY }}
         run: |
           echo "$GSC_KEY" > /tmp/gsc-key.json
           python3 << 'PYTHON'
-          import json, time
+          import json, os, time, subprocess
           from google.oauth2 import service_account
           from googleapiclient.discovery import build
           from googleapiclient.errors import HttpError
 
-          with open('/tmp/gsc-key.json') as f:
-              key_data = f.read()
-          
-          # Save key to file
-          with open('/tmp/gsc-key-file.json', 'w') as f:
-              f.write(key_data)
-          
+          # Get list of changed files in this commit
+          result = subprocess.run(
+              ['git', 'diff', '--name-only', 'HEAD~1', 'HEAD'],
+              capture_output=True, text=True
+          )
+          changed_files = result.stdout.strip().split('\n') if result.stdout.strip() else []
+
+          # Map file paths to URLs
+          SITE = 'https://creativewavecom.github.io/lifeclock'
+          url_map = {
+              'index.html': f'{SITE}/',
+              'faq.html': f'{SITE}/faq.html',
+              'about.html': f'{SITE}/about.html',
+          }
+          # Blog posts
+          for f in changed_files:
+              if f.startswith('blog/') and f.endswith('.html'):
+                  slug = f.replace('blog/', '').replace('.html', '')
+                  url_map[f] = f'{SITE}/blog/{slug}.html'
+
+          # Also submit sitemap.xml if changed
+          if 'sitemap.xml' in changed_files:
+              url_map['sitemap.xml'] = None  # just resubmit sitemap
+
+          # If no relevant files changed, submit all (for manual trigger)
+          relevant = [f for f in changed_files if f in url_map]
+          if not relevant and os.getenv('GITHUB_EVENT_NAME') == 'workflow_dispatch':
+              # Manual trigger: submit all pages
+              relevant = list(url_map.keys())
+
+          if not relevant:
+              print("No relevant files changed. Skipping.")
+              exit(0)
+
           credentials = service_account.Credentials.from_service_account_file(
-              '/tmp/gsc-key-file.json',
+              '/tmp/gsc-key.json',
               scopes=['https://www.googleapis.com/auth/indexing']
           )
           indexing_service = build('indexing', 'v3', credentials=credentials)
 
-          pages = [
-              'https://creativewavecom.github.io/lifeclock/',
-              'https://creativewavecom.github.io/lifeclock/faq.html',
-              'https://creativewavecom.github.io/lifeclock/about.html',
-              'https://creativewavecom.github.io/lifeclock/blog/what-is-life-clock.html',
-              'https://creativewavecom.github.io/lifeclock/blog/benefits.html',
-              'https://creativewavecom.github.io/lifeclock/blog/circadian-rhythm.html',
-              'https://creativewavecom.github.io/lifeclock/blog/sun-time-vs-clock-time.html',
-              'https://creativewavecom.github.io/lifeclock/blog/prayer-times-and-life-clock.html',
-              'https://creativewavecom.github.io/lifeclock/blog/implementing-offline.html',
-              'https://creativewavecom.github.io/lifeclock/blog/tehran-prayer-times.html',
-              'https://creativewavecom.github.io/lifeclock/blog/converter-guide.html',
-              'https://creativewavecom.github.io/lifeclock/blog/solar-time-guide.html',
-              'https://creativewavecom.github.io/lifeclock/blog/sunrise-sunset-tehran.html',
-              'https://creativewavecom.github.io/lifeclock/blog/fasting-and-life-clock.html',
-          ]
-
-          success = 0
-          for page in pages:
+          submitted = 0
+          for f in relevant:
+              url = url_map.get(f)
+              if not url:
+                  continue
               try:
                   result = indexing_service.urlNotifications().publish(
-                      body={'url': page, 'type': 'URL_UPDATED'}
+                      body={'url': url, 'type': 'URL_UPDATED'}
                   ).execute()
-                  print(f"✓ {page}")
-                  success += 1
+                  print(f"✓ {url}")
+                  submitted += 1
               except HttpError as e:
-                  print(f"✗ {page}: {e._get_reason()}")
+                  print(f"✗ {url}: {e._get_reason()}")
               time.sleep(0.5)
           
-          print(f"\n{success}/{len(pages)} pages submitted")
-          PYTHON
+          print(f"\n{submitted} pages submitted for indexing")
 
-      - name: Submit sitemap to Search Console
-        env:
-          GSC_KEY: ${{ secrets.GSC_SERVICE_ACCOUNT_KEY }}
-        run: |
-          echo "$GSC_KEY" > /tmp/gsc-key.json
-          python3 << 'PYTHON'
-          from google.oauth2 import service_account
-          from googleapiclient.discovery import build
-          from googleapiclient.errors import HttpError
-
-          credentials = service_account.Credentials.from_service_account_file(
+          # Resubmit sitemap
+          print("\n=== Resubmitting sitemap ===")
+          webmasters_creds = service_account.Credentials.from_service_account_file(
               '/tmp/gsc-key.json',
               scopes=['https://www.googleapis.com/auth/webmasters']
           )
-          webmasters = build('webmasters', 'v3', credentials=credentials)
-
-          SITE_URL = 'https://creativewavecom.github.io/lifeclock/'
-          try:
-              # Delete old sitemap
-              webmasters.sitemaps().delete(
-                  siteUrl=SITE_URL,
-                  feedpath='https://creativewavecom.github.io/lifeclock/sitemap.xml'
-              ).execute()
-              print("✓ Old sitemap deleted")
-          except:
-              pass
-
+          webmasters = build('webmasters', 'v3', credentials=webmasters_creds)
+          SITE_URL = f'{SITE}/'
           try:
               webmasters.sitemaps().submit(
                   siteUrl=SITE_URL,
-                  feedpath='https://creativewavecom.github.io/lifeclock/sitemap.xml'
+                  feedpath=f'{SITE}/sitemap.xml'
               ).execute()
               print("✓ Sitemap resubmitted")
           except HttpError as e:
-              print(f"✗ Sitemap submit failed: {e._get_reason()}")
+              print(f"✗ Sitemap: {e._get_reason()}")
           PYTHON
+
+      - name: Clean up
+        run: rm -f /tmp/gsc-key.json
+        if: always()

@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <meta name="description" content="Life Clock — a clock suited for life where 9 AM always equals real sunrise. Prayer times, official-to-life-clock converter, time difference, blog and research. Fully offline.">
-    <meta name="keywords" content="Life Clock, life clock, اوقات شرعی, prayer times, طلوع, غروب, مبدل ساعت, timezone, ایران, ایران">
+    <meta name="description" content="Life Clock — a clock suited for life where 9 AM always equals real sunrise. Official-to-life-clock converter, prayer times, time difference, blog and research. Fully offline.">
+    <meta name="keywords" content="life clock, prayer times, sunrise, sunset, time converter, timezone, iran, Iran">
     <meta name="author" content="Life Clock">
     <meta name="robots" content="index, follow">
     <meta name="theme-color" content="#fa8f3f" media="(prefers-color-scheme: light)">
@@ -24,20 +24,20 @@
 
     <!-- Open Graph (Facebook, WhatsApp, Telegram) -->
     <meta property="og:type" content="website">
-    <meta property="og:title" content="Life Clock | Life Clock">
-    <meta property="og:description" content="ساعتی که مناسب زندگی است where 9 AM always equals the real sunrise. اوقات شرعی، مبدل، اختلاف زمانی، بلاگ.">
+    <meta property="og:title" content="Life Clock">
+    <meta property="og:description" content="A clock suited for life where 9 AM always equals real sunrise. Prayer times, converter, blog.">
     <meta property="og:url" content="https://creativewavecom.github.io/lifeclock/en/">
     <meta property="og:site_name" content="Life Clock">
     <meta property="og:locale" content="fa_IR">
     <meta property="og:image" content="https://creativewavecom.github.io/lifeclock/assets/img/og-image.png">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
-    <meta property="og:image:alt" content="Life Clock — ساعتی که مناسب زندگی است و ساعت ۹ صبح آن همیشه طلوع آفتاب است">
+    <meta property="og:image:alt" content="Life Clock — A clock suited for life where 9 AM always equals real sunrise">
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Life Clock | Life Clock">
-    <meta name="twitter:description" content="ساعتی که مناسب زندگی است where 9 AM always equals the real sunrise.">
+    <meta name="twitter:title" content="Life Clock">
+    <meta name="twitter:description" content="A clock suited for life where 9 AM always equals the real sunrise.">
     <meta name="twitter:image" content="https://creativewavecom.github.io/lifeclock/assets/img/og-image.png">
 
     <title>Life Clock — Converter, Prayer Times, Time Difference</title>
@@ -65,8 +65,8 @@
         "@context": "https://schema.org",
         "@type": "WebApplication",
         "name": "Life Clock",
-        "alternateName": "Life Clock",
-        "description": "ساعتی که مناسب زندگی است where 9 AM always equals the real sunrise. اوقات شرعی، مبدل، اختلاف زمانی.",
+        "alternateName": "ساعة الحياة",
+        "description": "A clock suited for life where 9 AM always equals real sunrise. Prayer times, converter, time difference.",
         "url": "https://creativewavecom.github.io/lifeclock/",
         "applicationCategory": "LifestyleApplication",
         "operatingSystem": "Android, iOS, Web",
@@ -77,11 +77,11 @@
             "priceCurrency": "IRR"
         },
         "featureList": [
-            "اوقات شرعی بر اساس Life Clock",
-            "مبدل Official Time به Life Clock",
-            "اختلاف زمانی",
-            "کاملاً آفلاین",
-            "نصب روی اندروید"
+            "Prayer times with Life Clock",
+            "Official to Life Clock converter",
+            "Time difference",
+            "Fully offline",
+            "Installable on Android"
         ]
     }
     </script>
@@ -119,7 +119,7 @@
             <div class="widget-container">
                 <div class="widget-header">
                     <span id="persianDate" class="widget-date">—</span>
-                    <button class="settings-btn" id="settingsBtn" aria-label="Select City">⚙</button>
+                    <button class="settings-btn" id="settingsBtn" aria-label="Select city">⚙</button>
                 </div>
 
                 <div class="main-card">
@@ -142,7 +142,7 @@
                         📍 <span id="currentCity">Detecting...</span>
                     </button>
                     <div class="life-vs-official">
-                        رسمی: <span id="officialTime">--:--</span>
+                        Official: <span id="officialTime">--:--</span>
                     </div>
                 </div>
             </div>
@@ -153,7 +153,7 @@
                     <h3>Select City</h3>
                     <button id="closeSettings" class="close-x" aria-label="Close">✕</button>
                 </div>
-                <input type="text" id="citySearch" placeholder="Type city name..." autocomplete="off" aria-label="جستجوی شهر">
+                <input type="text" id="citySearch" placeholder="Type city name..." autocomplete="off" aria-label="City search">
                 <div class="city-list" id="cityList"></div>
                 <button id="useAutoLocation" class="btn-secondary auto-btn">📍 Auto-detect from location</button>
             </div>
@@ -161,7 +161,7 @@
 
         <!-- ============ DEFINITION ============ -->
         <section id="definition" class="definition-card">
-            <h1>🌟 Life Clock چیست؟</h1>
+            <h1>🌟 What is Life Clock?</h1>
             <p class="definition-text">
                 <strong>A clock suited for life</strong> where 9 AM always equals the real sunrise.
                 With this clock, we can sleep around 12 and see the sunrise at 9,
@@ -175,18 +175,18 @@
 
             <div class="theme-picker-block">
                 <span class="theme-label">🎨 Theme:</span>
-                <button class="theme-chip" data-theme="dark" title="Dark" aria-label="تم تیره" style="--c1:#0f0c29;--c2:#302b63;">🌙</button>
-                <button class="theme-chip" data-theme="light" title="Light" aria-label="تم روشن" style="--c1:#f5f5f5;--c2:#e0e0e0;">☀️</button>
-                <button class="theme-chip" data-theme="sunset" title="Sunset" aria-label="تم غروب" style="--c1:#ff6b6b;--c2:#ffd93d;">🌅</button>
-                <button class="theme-chip" data-theme="ocean" title="Ocean" aria-label="تم اقیانوس" style="--c1:#0c5b8c;--c2:#00d4ff;">🌊</button>
-                <button class="theme-chip" data-theme="forest" title="Forest" aria-label="تم جنگل" style="--c1:#0d3f2e;--c2:#52b788;">🌲</button>
-                <button class="theme-chip" data-theme="rose" title="Rose" aria-label="تم گل" style="--c1:#5d245c;--c2:#ff7eb9;">🌸</button>
+                <button class="theme-chip" data-theme="dark" title="Dark" aria-label="Dark theme" style="--c1:#0f0c29;--c2:#302b63;">🌙</button>
+                <button class="theme-chip" data-theme="light" title="Light" aria-label="Light theme" style="--c1:#f5f5f5;--c2:#e0e0e0;">☀️</button>
+                <button class="theme-chip" data-theme="sunset" title="Sunset" aria-label="Sunset theme" style="--c1:#ff6b6b;--c2:#ffd93d;">🌅</button>
+                <button class="theme-chip" data-theme="ocean" title="Ocean" aria-label="Ocean theme" style="--c1:#0c5b8c;--c2:#00d4ff;">🌊</button>
+                <button class="theme-chip" data-theme="forest" title="Forest" aria-label="Forest theme" style="--c1:#0d3f2e;--c2:#52b788;">🌲</button>
+                <button class="theme-chip" data-theme="rose" title="Rose" aria-label="Rose theme" style="--c1:#5d245c;--c2:#ff7eb9;">🌸</button>
             </div>
         </section>
 
         <!-- ============ CONVERTER ============ -->
         <section id="converter" class="card converter-section">
-            <h2>🔁 مبدل Official Time ⇄ Life Clock</h2>
+            <h2>🔁 Official ⇄ Life Clock Converter</h2>
             <p class="hint">Current time is pre-filled. Type any number to convert instantly.</p>
 
             <div class="converter-display">
@@ -195,9 +195,9 @@
                     <div class="conv-glyph" aria-hidden="true">🌅</div>
                     <div class="conv-label">Life Clock</div>
                     <div class="conv-input-wrap">
-                        <input type="text" id="lifeHour" class="conv-num" inputmode="numeric" maxlength="2" value="00" aria-label="Life Clock - ساعت">
+                        <input type="text" id="lifeHour" class="conv-num" inputmode="numeric" maxlength="2" value="00" aria-label="Life clock - hour">
                         <span class="conv-colon">:</span>
-                        <input type="text" id="lifeMin" class="conv-num" inputmode="numeric" maxlength="2" value="00" aria-label="Life Clock - دقیقه">
+                        <input type="text" id="lifeMin" class="conv-num" inputmode="numeric" maxlength="2" value="00" aria-label="Life clock - minute">
                     </div>
                     <div class="conv-sublabel">Based on today's sunrise</div>
                 </div>
@@ -207,9 +207,9 @@
                     <div class="conv-glyph" aria-hidden="true">🕜</div>
                     <div class="conv-label">Official Time</div>
                     <div class="conv-input-wrap">
-                        <input type="text" id="officialHour" class="conv-num" inputmode="numeric" maxlength="2" value="00" aria-label="Official Time - ساعت">
+                        <input type="text" id="officialHour" class="conv-num" inputmode="numeric" maxlength="2" value="00" aria-label="Official time - hour">
                         <span class="conv-colon">:</span>
-                        <input type="text" id="officialMin" class="conv-num" inputmode="numeric" maxlength="2" value="00" aria-label="Official Time - دقیقه">
+                        <input type="text" id="officialMin" class="conv-num" inputmode="numeric" maxlength="2" value="00" aria-label="Official time - minute">
                     </div>
                     <div class="conv-sublabel">Your city's local time</div>
                 </div>
@@ -247,7 +247,7 @@
                 </div>
 
                 <div class="diff-explanation" id="diffExplanation">
-                    <p>در حال محاسبه...</p>
+                    <p>Calculating...</p>
                 </div>
             </div>
         </details>
@@ -255,11 +255,11 @@
         <!-- ============ PRAYER TABLE (collapsible) ============ -->
         <details id="prayer" class="card collapsible">
             <summary class="collapsible-header">
-                <h2>🕌 اوقات شرعی به همراه Life Clock</h2>
+                <h2>🕌 Prayer Times with Life Clock</h2>
                 <span class="chevron" aria-hidden="true">▼</span>
             </summary>
             <div class="collapsible-body">
-                <p class="hint">اوقات شرعی شهرتون به همراه معادل Life Clock هر کدوم.</p>
+                <p class="hint">Prayer times for your city with their Life Clock equivalents.</p>
 
                 <div class="prayer-table">
                     <div class="prayer-row header">
@@ -311,41 +311,41 @@
         <!-- ============ BLOG ============ -->
         <section id="blog" class="card">
             <h2>📚 Blog & Research</h2>
-            <p class="hint">مقالات و تحقیقات درباره Life Clock، فواید استفاده از آن، و مبانی علمی.</p>
+            <p class="hint">Articles and research about Life Clock, its benefits, and scientific foundations.</p>
 
             <div class="blog-list">
                 <article class="blog-card">
-                    <h3><a href="../blog/what-is-life-clock.html">Life Clock چیست؟</a></h3>
-                    <p>تعریف، تاریخچه، و تفاوت با Official Time. چرا «۹ صبح = طلوع»؟</p>
+                    <h3><a href="../blog/what-is-life-clock.html">What is Life Clock?</a></h3>
+                    <p>Definition, history, and difference from official time. Why "9 AM = sunrise"?</p>
                     <a href="../blog/what-is-life-clock.html" class="read-more">Read more ←</a>
                 </article>
 
                 <article class="blog-card">
-                    <h3><a href="../blog/benefits.html">فواید استفاده از Life Clock</a></h3>
+                    <h3><a href="../blog/benefits.html">Benefits of Life Clock</a></h3>
                     <p>How syncing with natural solar rhythm improves sleep, energy, and productivity.</p>
                     <a href="../blog/benefits.html" class="read-more">Read more ←</a>
                 </article>
 
                 <article class="blog-card">
-                    <h3><a href="../blog/circadian-rhythm.html">ساعت بیولوژیک و ریادین</a></h3>
+                    <h3><a href="../blog/circadian-rhythm.html">Biological Clock & Circadian Rhythm</a></h3>
                     <p>Scientific research on circadian rhythm, sunlight, and hormone effects.</p>
                     <a href="../blog/circadian-rhythm.html" class="read-more">Read more ←</a>
                 </article>
 
                 <article class="blog-card">
-                    <h3><a href="../blog/sun-time-vs-clock-time.html">زمان خورشیدی vs زمان ساعت</a></h3>
-                    <p>چرا منطقه‌بندی زمانی باعث می‌شه طلوع واقعی با طلوع Official Time فرق کنه.</p>
+                    <h3><a href="../blog/sun-time-vs-clock-time.html">Solar Time vs Clock Time</a></h3>
+                    <p>Why timezone zones cause real sunrise to differ from official sunrise.</p>
                     <a href="../blog/sun-time-vs-clock-time.html" class="read-more">Read more ←</a>
                 </article>
 
                 <article class="blog-card">
-                    <h3><a href="../blog/prayer-times-and-life-clock.html">اوقات شرعی و Life Clock</a></h3>
-                    <p>چطور Life Clock با اوقات شرعی هم‌پوشانی داره و هر کدوم چطور محاسبه می‌ شن.</p>
+                    <h3><a href="../blog/prayer-times-and-life-clock.html">Prayer Times and Life Clock</a></h3>
+                    <p>How Life Clock overlaps with prayer times and how each is calculated.</p>
                     <a href="../blog/prayer-times-and-life-clock.html" class="read-more">Read more ←</a>
                 </article>
 
                 <article class="blog-card">
-                    <h3><a href="../blog/implementing-offline.html">پیاده‌سازی آفلاین با فرمول NOAA</a></h3>
+                    <h3><a href="../blog/implementing-offline.html">Offline Implementation with NOAA Formula</a></h3>
                     <p>How to calculate sunrise/sunset offline, with ±2 minute accuracy.</p>
                     <a href="../blog/implementing-offline.html" class="read-more">Read more ←</a>
                 </article>
@@ -354,8 +354,8 @@
 
         <!-- ============ ABOUT + DOWNLOAD ============ -->
         <section id="about" class="card">
-            <h2>ℹ️ درباره Life Clock</h2>
-            <p>این پروژه یک ابزار آزاد و آفلاین برای نمایش «Life Clock» است — defined as 9 AM = real sunrise for your city. All calculations use the NOAA formula, no server needed.</p>
+            <h2>ℹ️ About Life Clock</h2>
+            <p>This project is a free, offline tool for displaying "Life Clock" — defined as 9 AM = real sunrise for your city. All calculations use the NOAA formula, no server needed.</p>
 
             <div class="download-section">
                 <h3>📲 Download Android App</h3>
@@ -382,15 +382,15 @@
 
         <footer>
             <p>Made with ❤️ — <a href="https://github.com/creativewavecom/lifeclock">creativewavecom/lifeclock</a></p>
-            <p class="footer-note">© ۲۰۲۴ — Life Clock. محاسبات با فرمول NOAA، دقت ±۲ دقیقه.</p>
+            <p class="footer-note">© 2024 — Life Clock. Calculations via NOAA formula, ±2 min accuracy.</p>
         </footer>
     </main>
 
     <!-- Confirmation modal for detected city -->
     <div class="modal-overlay" id="confirmModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
         <div class="modal">
-            <h3 id="modalTitle">📍 Your City</h3>
-            <p>شهر شما به‌عنوان <strong id="detectedCity">—</strong> تشخیص داده شد.</p>
+            <h3 id="modalTitle">📍 Your city</h3>
+            <p>Your city detected as <strong id="detectedCity">—</strong> detected.</p>
             <p class="modal-hint">Is this correct?</p>
             <div class="modal-actions">
                 <button id="confirmCity" class="btn-primary">✓ Yes, correct</button>

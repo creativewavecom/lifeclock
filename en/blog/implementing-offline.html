@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offline Implementation with the NOAA Formula | Life Clock Blog</title>
+    <meta name="description" content="How to compute sunrise and sunset without internet using the NOAA formula. Accuracy of ±2 minutes, fully offline. Full algorithm explanation with code.">
+    <meta name="keywords" content="NOAA formula, sunrise calculation, sunset calculation, offline, sunrise calculation, sunset">
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="Life Clock">
+    <link rel="canonical" href="https://creativewavecom.github.io/lifeclock/en/blog/implementing-offline.html">
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Offline Implementation with the NOAA Formula | Sunrise Calculation">
+    <meta property="og:description" content="How to compute sunrise and sunset without internet using the NOAA formula. Accuracy of ±2 minutes, fully offline. Full algorithm explanation with code.">
+    <meta property="og:url" content="https://creativewavecom.github.io/lifeclock/en/blog/implementing-offline.html">
+    <meta property="og:site_name" content="Life Clock">
+    <meta property="og:locale" content="en_US">
+    <meta property="og:image" content="https://creativewavecom.github.io/lifeclock/assets/img/og-image.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="article:published_time" content="2024-08-29">
+    <meta property="article:modified_time" content="2024-08-29">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Offline Implementation with the NOAA Formula | Sunrise Calculation">
+    <meta name="twitter:description" content="How to compute sunrise and sunset without internet using the NOAA formula. Accuracy of ±2 minutes, fully offline. Full algorithm explanation with code.">
+    <meta name="twitter:image" content="https://creativewavecom.github.io/lifeclock/assets/img/og-image.png">
+
+    <!-- Theme color -->
+    <meta name="theme-color" content="#fa8f3f">
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "headline": "Offline Implementation with the NOAA Formula | Sunrise Calculation",
+        "description": "How to compute sunrise and sunset without internet using the NOAA formula. Accuracy of ±2 minutes, fully offline. Full algorithm explanation with code.",
+        "url": "https://creativewavecom.github.io/lifeclock/en/blog/implementing-offline.html",
+        "datePublished": "2024-08-29",
+        "dateModified": "2024-08-29",
+        "inLanguage": "en-US",
+        "author": {
+            "@type": "Organization",
+            "name": "Life Clock",
+            "url": "https://creativewavecom.github.io/lifeclock/"
+        },
+        "publisher": {
+            "@type": "Organization",
+            "name": "Life Clock",
+            "url": "https://creativewavecom.github.io/lifeclock/",
+            "logo": {
+                "@type": "ImageObject",
+                "url": "https://creativewavecom.github.io/lifeclock/assets/img/og-image.png"
+            }
+        },
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https://creativewavecom.github.io/lifeclock/en/blog/implementing-offline.html"
+        }
+    }
+    </script>
+    <link rel="icon" href="../../assets/img/favicon.svg" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home",
+                "item": "https://creativewavecom.github.io/lifeclock/"
+            },
+            {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "Blog",
+                "item": "https://creativewavecom.github.io/lifeclock/#blog"
+            },
+            {
+                "@type": "ListItem",
+                "position": 3,
+                "name": "Offline Implementation with the NOAA Formula",
+                "item": "https://creativewavecom.github.io/lifeclock/en/blog/implementing-offline.html"
+            }
+        ]
+    }
+    </script>
+</head>
+<body>
+    <div class="bg-gradient" aria-hidden="true"></div>
+
+    <nav class="topnav">
+        <a href="../../index.html" class="brand">⚡ Life Clock</a>
+        <div class="nav-links">
+            <a href="../../index.html#widget">Widget</a>
+            <a href="../../index.html#converter">Converter</a>
+            <a href="../../index.html#blog">Blog</a>
+        </div>
+    </nav>
+
+    <article class="blog-post">
+        <h1>Offline Implementation with the NOAA Formula</h1>
+        <div class="meta">2024-08-04 — Life Clock Research</div>
+
+        <p>One of the design principles of Life Clock is that it works <strong>fully offline</strong> — no dependency on any API or server. In this article we take a technical look at the NOAA formula for computing sunrise and sunset times, and see how an accuracy of <code>±2 minutes</code> can be achieved in under 100 lines of code.</p>
+
+        <h2>Why offline?</h2>
+        <p>Depending on an API for sunrise calculation has several drawbacks:</p>
+        <ul>
+            <li><strong>Privacy:</strong> every API request sends your geographic location to an external server.</li>
+            <li><strong>Reliability:</strong> if the server goes down, the app stops working.</li>
+            <li><strong>Request limits:</strong> most free APIs have daily limits.</li>
+            <li><strong>Battery usage:</strong> every network request consumes energy.</li>
+        </ul>
+
+        <p>By using the NOAA formula, all calculations happen locally — no information leaves your device.</p>
+
+        <h2>The NOAA algorithm</h2>
+        <p>The NOAA Solar Position algorithm consists of three main formulas:</p>
+
+        <h3>1. Fractional Year</h3>
+        <p>First, the day of year and the hour of day are converted into an angle in radians:</p>
+        <div class="callout">
+            <code>γ = 2π/365 × (dayOfYear − 1 + (hour − 12)/24)</code>
+        </div>
+        <p>For leap years, the denominator changes to 366.</p>
+
+        <h3>2. Equation of Time</h3>
+        <p>The Equation of Time gives the difference, in minutes, between true solar time and mean time:</p>
+        <div class="callout">
+            <code>eqTime = 229.18 × (0.000075 + 0.001868·cos(γ) − 0.032077·sin(γ) − 0.014615·cos(2γ) − 0.040849·sin(2γ))</code>
+        </div>
+        <p>This formula approximates the contribution of Earth's orbital eccentricity and axial tilt. Its value varies between <code>−14</code> and <code>+16</code> minutes over the year.</p>
+
+        <h3>3. Solar Declination</h3>
+        <p>This angle determines the season — i.e., the angle by which the sun is offset from the equator:</p>
+        <div class="callout">
+            <code>decl = 0.006918 − 0.399912·cos(γ) + 0.070257·sin(γ) − 0.006758·cos(2γ) + 0.000907·sin(2γ) − 0.002697·cos(3γ) + 0.001480·sin(3γ)</code>
+        </div>
+        <p>This angle varies between <code>+23.4°</code> (summer solstice) and <code>−23.4°</code> (winter solstice) over the year.</p>
+
+        <h3>4. Hour Angle</h3>
+        <p>The hour angle is the angle the sun must traverse to reach the desired event (such as sunrise). For sunrise and sunset, the zenith angle is <code>90.833°</code> (accounting for atmospheric refraction):</p>
+        <div class="callout">
+            <code>cos(H) = (cos(Z) − sin(lat)·sin(decl)) / (cos(lat)·cos(decl))</code>
+        </div>
+        <p>If <code>cos(H) > 1</code>, the sun never rises (polar night). If <code>cos(H) < −1</code>, the sun never sets (midnight sun).</p>
+
+        <h3>5. Local sunrise and sunset times</h3>
+        <p>With the hour angle in hand, sunrise and sunset times in local minutes are computed as follows:</p>
+        <div class="callout">
+            <code>sunrise = 720 − 4·(lon + H·180/π) − eqTime</code><br>
+            <code>sunset = 720 − 4·(lon − H·180/π) − eqTime</code>
+        </div>
+        <p>These values are in minutes from local midnight. To convert to UTC, the longitude (where every 15 degrees equals 1 hour) must be taken into account.</p>
+
+        <h2>For prayer times (twilight)</h2>
+        <p>For Fajr and Isha, we simply change the zenith angle:</p>
+        <ul>
+            <li><strong>Fajr:</strong> <code>Z = 108°</code> (sun 18° below the horizon)</li>
+            <li><strong>Isha:</strong> <code>Z = 107°</code> (sun 17° below the horizon)</li>
+        </ul>
+
+        <p>And we use the same <code>cos(H)</code> formula, but with the new angle.</p>
+
+        <h2>For Dhuhr</h2>
+        <p>Dhuhr is the moment when the sun is at the highest point of its daily arc — i.e., apparent noon. It is computed simply as:</p>
+        <div class="callout">
+            <code>solarNoon = 720 − 4·lon − eqTime</code>
+        </div>
+
+        <h2>For Asr</h2>
+        <p>Computing Asr is more complex, because it depends on shadow. In the Shia school, it is the moment when the shadow of an object equals its own height (plus the noon shadow). Its formula:</p>
+        <div class="callout">
+            <code>tan(asr_altitude) = 1 + tan(|lat − decl|)</code>
+        </div>
+        <p>Then the hour angle for this solar altitude is computed:</p>
+        <div class="callout">
+            <code>cos(H_asr) = (sin(−asr_altitude) − sin(lat)·sin(decl)) / (cos(lat)·cos(decl))</code>
+        </div>
+
+        <h2>Implementation in JavaScript</h2>
+        <p>These formulas have been implemented identically in JavaScript (in the browser) and Kotlin (in the Android app). The JavaScript code is available in the <code>app.js</code> file of this site. The Kotlin code is available in the <code>creativewavecom/lifeclock</code> GitHub repo.</p>
+
+        <h2>Accuracy and limitations</h2>
+        <p>The NOAA formula performs well at mid-latitudes (such as Iran, <code>25° to 40° north</code>):</p>
+        <ul>
+            <li>Sunrise and sunset: <code>±2 minutes</code></li>
+            <li>Dhuhr: <code>±1 minute</code></li>
+            <li>Fajr and Isha (twilight): <code>±5 minutes</code></li>
+        </ul>
+
+        <p>The reason twilight times are less accurate is that at low angles, atmospheric refraction is more variable. For higher accuracy, more complex models such as <strong>SAEE (Standards of Astronomical Algorithms for Eclipses)</strong> can be used, but the computational complexity increases significantly.</p>
+
+        <h2>For polar regions</h2>
+        <p>In polar regions (north of <code>66.5°</code> or south of <code>−66.5°</code>), at certain times of the year the sun either never rises or never sets. In this case, <code>cos(H)</code> falls outside the range <code>[−1, 1]</code> and the formula returns <code>NaN</code>. In our app, this case is displayed as "—".</p>
+
+        <h2>Testing and validation</h2>
+        <p>To ensure the calculations are correct, we compared the formula's output against data from <code>timeanddate.com</code> and <code>aladhan.com</code> for several cities across different seasons. The result: the difference is usually under 2 minutes, which is sufficient for everyday use.</p>
+
+        <h2>Conclusion</h2>
+        <p>With fewer than 100 lines of JavaScript, you can compute sunrise, sunset, and prayer times accurately enough for everyday use — without needing internet or an external API. This not only protects privacy but also makes the app faster and more reliable.</p>
+
+        <a href="../../index.html#blog" class="back-link">← Back to blog</a>
+    </article>
+
+    <!-- Google Analytics (GA4) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-DMH0V6561Y"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-DMH0V6561Y');
+    </script>
+</body>
+</html>

@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>التنفيذ دون اتصال بصيغة NOAA | مدونة ساعة الحياة</title>
+    <meta name="description" content="طريقة حساب شروق وغروب الشمس دون إنترنت بصيغة NOAA. دقة ±٢ دقيقة، بالكامل دون اتصال. شرح كامل للخوارزمية مع كود.">
+    <meta name="keywords" content="صيغة NOAA, حساب الشروق, حساب الغروب, دون اتصال, sunrise calculation, sunset">
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="ساعة الحياة">
+    <link rel="canonical" href="https://creativewavecom.github.io/lifeclock/ar/blog/implementing-offline.html">
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="التنفيذ دون اتصال بصيغة NOAA | حساب الشروق">
+    <meta property="og:description" content="طريقة حساب شروق وغروب الشمس دون إنترنت بصيغة NOAA. دقة ±٢ دقيقة، بالكامل دون اتصال. شرح كامل للخوارزمية مع كود.">
+    <meta property="og:url" content="https://creativewavecom.github.io/lifeclock/ar/blog/implementing-offline.html">
+    <meta property="og:site_name" content="ساعة الحياة">
+    <meta property="og:locale" content="ar_AR">
+    <meta property="og:image" content="https://creativewavecom.github.io/lifeclock/assets/img/og-image.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="article:published_time" content="2024-08-29">
+    <meta property="article:modified_time" content="2024-08-29">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="التنفيذ دون اتصال بصيغة NOAA | حساب الشروق">
+    <meta name="twitter:description" content="طريقة حساب شروق وغروب الشمس دون إنترنت بصيغة NOAA. دقة ±٢ دقيقة، بالكامل دون اتصال. شرح كامل للخوارزمية مع كود.">
+    <meta name="twitter:image" content="https://creativewavecom.github.io/lifeclock/assets/img/og-image.png">
+
+    <!-- Theme color -->
+    <meta name="theme-color" content="#fa8f3f">
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "headline": "التنفيذ دون اتصال بصيغة NOAA | حساب الشروق",
+        "description": "طريقة حساب شروق وغروب الشمس دون إنترنت بصيغة NOAA. دقة ±٢ دقيقة، بالكامل دون اتصال. شرح كامل للخوارزمية مع كود.",
+        "url": "https://creativewavecom.github.io/lifeclock/ar/blog/implementing-offline.html",
+        "datePublished": "2024-08-29",
+        "dateModified": "2024-08-29",
+        "inLanguage": "ar-AR",
+        "author": {
+            "@type": "Organization",
+            "name": "ساعة الحياة",
+            "url": "https://creativewavecom.github.io/lifeclock/"
+        },
+        "publisher": {
+            "@type": "Organization",
+            "name": "ساعة الحياة",
+            "url": "https://creativewavecom.github.io/lifeclock/",
+            "logo": {
+                "@type": "ImageObject",
+                "url": "https://creativewavecom.github.io/lifeclock/assets/img/og-image.png"
+            }
+        },
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https://creativewavecom.github.io/lifeclock/ar/blog/implementing-offline.html"
+        }
+    }
+    </script>
+    <link rel="icon" href="../../assets/img/favicon.svg" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "الرئيسية",
+                "item": "https://creativewavecom.github.io/lifeclock/"
+            },
+            {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "المدونة",
+                "item": "https://creativewavecom.github.io/lifeclock/#blog"
+            },
+            {
+                "@type": "ListItem",
+                "position": 3,
+                "name": "التنفيذ دون اتصال بصيغة NOAA",
+                "item": "https://creativewavecom.github.io/lifeclock/ar/blog/implementing-offline.html"
+            }
+        ]
+    }
+    </script>
+</head>
+<body>
+    <div class="bg-gradient" aria-hidden="true"></div>
+
+    <nav class="topnav">
+        <a href="../../index.html" class="brand">⚡ ساعة الحياة</a>
+        <div class="nav-links">
+            <a href="../../index.html#widget">الأداة</a>
+            <a href="../../index.html#converter">المحول</a>
+            <a href="../../index.html#blog">المدونة</a>
+        </div>
+    </nav>
+
+    <article class="blog-post">
+        <h1>التنفيذ دون اتصال بصيغة NOAA</h1>
+        <div class="meta">١٤٠٣/٠٥/١٤ — أبحاث ساعة الحياة</div>
+
+        <p>من مبادئ تصميم ساعة الحياة أن تعمل <strong>بالكامل دون اتصال</strong> — لا اعتماد على API أو خادم. في هذا المقال نلقي نظرة تقنية على صيغة NOAA لحساب وقتي الشروق والغروب ونرى كيف يمكن بأقل من ١٠٠ سطر كود الوصول إلى دقة <code>±٢ دقيقة</code>.</p>
+
+        <h2>لماذا دون اتصال؟</h2>
+        <p>الاعتماد على API لحساب وقت الشروق له مشكلات:</p>
+        <ul>
+            <li><strong>الخصوصية:</strong> كل طلب API يرسل موقعك الجغرافي إلى خادم خارجي.</li>
+            <li><strong>الموثوقية:</strong> إذا انقطع الخادم، لا يعمل التطبيق.</li>
+            <li><strong>حدود الطلبات:</strong> معظم واجهات API المجانية لها حدود يومية.</li>
+            <li><strong>استهلاك البطارية:</strong> كل طلب شبكة يستهلك طاقة.</li>
+        </ul>
+
+        <p>باستخدام صيغة NOAA، تُجرى جميع الحسابات محلياً — لا تخرج أي معلومات من جهازك.</p>
+
+        <h2>خوارزمية NOAA</h2>
+        <p>تتكون خوارزمية NOAA Solar Position من ثلاث صيغ رئيسية:</p>
+
+        <h3>١. الكسر السنوي (Fractional Year)</h3>
+        <p>أولاً، نحوّل يوم السنة وساعة اليوم إلى زاوية بالراديان:</p>
+        <div class="callout">
+            <code>γ = 2π/365 × (dayOfYear − 1 + (hour − 12)/24)</code>
+        </div>
+        <p>للسنوات الكبيسة، يصبح المقام ٣٦٦.</p>
+
+        <h3>٢. معادلة الوقت (Equation of Time)</h3>
+        <p>تُظهر معادلة الوقت الفرق بين الوقت الشمسي الحقيقي والوقت المتوسط بالدقائق:</p>
+        <div class="callout">
+            <code>eqTime = 229.18 × (0.000075 + 0.001868·cos(γ) − 0.032077·sin(γ) − 0.014615·cos(2γ) − 0.040849·sin(2γ))</code>
+        </div>
+        <p>هذه الصيغة تقريب لانحراف مدار الأرض وميلان محورها. تتغير قيمتها على مدار السنة بين <code>−١٤</code> و<code>+١٦</code> دقيقة.</p>
+
+        <h3>٣. ميلان الشمس (Solar Declination)</h3>
+        <p>هذه الزاوية تحدد الفصل — أي الزاوية التي تبعد بها الشمس عن خط الاستواء:</p>
+        <div class="callout">
+            <code>decl = 0.006918 − 0.399912·cos(γ) + 0.070257·sin(γ) − 0.006758·cos(2γ) + 0.000907·sin(2γ) − 0.002697·cos(3γ) + 0.001480·sin(3γ)</code>
+        </div>
+        <p>تتغير قيمة هذه الزاوية على مدار السنة بين <code>+٢٣.٤°</code> (الانقلاب الصيفي) و<code>−٢٣.٤°</code> (الانقلاب الشتوي).</p>
+
+        <h3>٤. زاوية الساعة (Hour Angle)</h3>
+        <p>زاوية الساعة هي الزاوية التي يجب أن تجتازها الشمس للوصول إلى الزاوية المطلوبة (مثل الشروق). للشروق والغروب، تكون زاوية الذروة (zenith) مساوية <code>٩٠.٨٣٣°</code> (مع أخذ انكسار الضوء في الغلاف الجوي في الحسبان):</p>
+        <div class="callout">
+            <code>cos(H) = (cos(Z) − sin(lat)·sin(decl)) / (cos(lat)·cos(decl))</code>
+        </div>
+        <p>إذا كان <code>cos(H) > ١</code>، فلا تشرق الشمس أبداً (ليل قطبي). إذا كان <code>cos(H) < −١</code>، لا تغرب الشمس أبداً (نهار قطبي).</p>
+
+        <h3>٥. وقت الشروق والغروب المحلي</h3>
+        <p>بمعرفة زاوية الساعة، يُحسب وقت الشروق والغروب بالدقائق المحلية على النحو التالي:</p>
+        <div class="callout">
+            <code>sunrise = 720 − 4·(lon + H·180/π) − eqTime</code><br>
+            <code>sunset = 720 − 4·(lon − H·180/π) − eqTime</code>
+        </div>
+        <p>هذه القيم بالدقائق من منتصف الليل المحلي. للتحويل إلى UTC، يجب أخذ خط الطول (الذي كل ١٥ درجة منه = ساعة) في الحسبان.</p>
+
+        <h2>لأوقات الصلاة (Twilight)</h2>
+        <p>لأذان الفجر والعشاء، يكفي تغيير زاوية الذروة (zenith):</p>
+        <ul>
+            <li><strong>أذان الفجر (Fajr):</strong> <code>Z = 108°</code> (الشمس ١٨° تحت الأفق)</li>
+            <li><strong>أذان العشاء (Isha):</strong> <code>Z = 107°</code> (الشمس ١٧° تحت الأفق)</li>
+        </ul>
+
+        <p>ونستخدم الصيغة نفسها <code>cos(H)</code>، لكن بالزاوية الجديدة.</p>
+
+        <h2>لأذان الظهر (Dhuhr)</h2>
+        <p>أذان الظهر هو اللحظة التي تكون فيها الشمس في أعلى نقطة في يومها — أي الظهر الظاهري. يُحسب ببساطة:</p>
+        <div class="callout">
+            <code>solarNoon = 720 − 4·lon − eqTime</code>
+        </div>
+
+        <h2>لأذان العصر (Asr)</h2>
+        <p>حساب أذان العصر أكثر تعقيداً، لأنه يعتمد على الظل. في المذهب الشيعي، هو الوقت الذي يبلغ فيه ظلُّ شيءٍ مثلَ ارتفاعه (زائد ظل الظهر). صيغته:</p>
+        <div class="callout">
+            <code>tan(asr_altitude) = 1 + tan(|lat − decl|)</code>
+        </div>
+        <p>ثم تُحسب زاوية الساعة لهذا الارتفاع للشمس:</p>
+        <div class="callout">
+            <code>cos(H_asr) = (sin(−asr_altitude) − sin(lat)·sin(decl)) / (cos(lat)·cos(decl))</code>
+        </div>
+
+        <h2>التنفيذ في JavaScript</h2>
+        <p>تُنفَّذ هذه الصيغ بشكل متطابق في JavaScript (في المتصفح) وKotlin (في تطبيق أندرويد). كود JavaScript موجود في ملف <code>app.js</code> لهذا الموقع. كود Kotlin متاح في مستودع GitHub <code>creativewavecom/lifeclock</code>.</p>
+
+        <h2>الدقة والحدود</h2>
+        <p>صيغة NOAA جيدة الدقة في خطوط العرض المتوسطة (مثل إيران، <code>٢٥° إلى ٤٠° شمالاً</code>):</p>
+        <ul>
+            <li>الشروق والغروب: <code>±٢ دقيقة</code></li>
+            <li>أذان الظهر: <code>±١ دقيقة</code></li>
+            <li>أذان الفجر والعشاء (twilight): <code>±٥ دقائق</code></li>
+        </ul>
+
+        <p>سبب ضعف الدقة في twilight هو أن انكسار الضوء في الغلاف الجوي يكون أكثر تقلباً عند الزوايا المنخفضة. للحصول على دقة أعلى، يمكن استخدام نماذج أكثر تعقيداً مثل <strong>SAEE (Standards of Astronomical Algorithms for Eclipses)</strong>، لكن تتعقد الحسابات بشكل كبير.</p>
+
+        <h2>للمناطق القطبية</h2>
+        <p>في المناطق القطبية (شمال <code>٦٦.٥°</code> أو جنوب <code>−٦٦.٥°</code>)، في مواسم معينة من السنة، لا تشرق الشمس أو لا تغرب. في هذه الحالة، تخرج <code>cos(H)</code> عن النطاق <code>[−1, 1]</code> وتُرجع الصيغة قيمة <code>NaN</code>. في تطبيقنا، تُعرَض هذه الحالة على شكل "—".</p>
+
+        <h2>الاختبار والتحقق</h2>
+        <p>للتأكد من صحة الحسابات، قارنّا مخرجات الصيغة ببيانات <code>timeanddate.com</code> و<code>aladhan.com</code> لعدة مدن في مواسم مختلفة. النتيجة: الفرق عادةً أقل من دقيقتين، وهو كافٍ للتطبيقات اليومية.</p>
+
+        <h2>الخلاصة</h2>
+        <p>بأقل من ١٠٠ سطر من كود JavaScript، يمكن حساب وقتي الشروق والغروب وأوقات الصلاة بدقة كافية للاستخدام اليومي — دون الحاجة إلى إنترنت أو API خارجي. هذا لا يحفظ الخصوصية فحسب، بل يجعل التطبيق أسرع وأكثر موثوقية.</p>
+
+        <a href="../../index.html#blog" class="back-link">← العودة إلى المدونة</a>
+    </article>
+
+    <!-- Google Analytics (GA4) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-DMH0V6561Y"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-DMH0V6561Y');
+    </script>
+</body>
+</html>

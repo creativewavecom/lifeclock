@@ -19,8 +19,7 @@
     const SUNRISE_LIFE_HOUR = 9;
     const SUNRISE_LIFE_SECONDS = SUNRISE_LIFE_HOUR * 3600;
     const ZENITH_OFFICIAL = 90.833;
-    const ZENITH_FAJR = 107.7;  // Shia: sun 17.7° below horizon
-    const ZENITH_ISHA = 104.0;  // Shia: sun 14° below horizon (Iranian convention)
+    // Prayer angles now come from I18N.prayerMethods (dynamic per language/method)
     const STORAGE_KEY = 'lifeclock.city';
     const THEME_KEY = 'lifeclock.theme';
     const DETECT_REJECTED_KEY = 'lifeclock.detectRejected';
@@ -202,19 +201,35 @@
 
         const sunriseMin = minutesForZenith(ZENITH_OFFICIAL, +1);
         const sunsetMin = minutesForZenith(ZENITH_OFFICIAL, -1);
-        const fajrMin = minutesForZenith(ZENITH_FAJR, +1);
-        const ishaMin = minutesForZenith(ZENITH_ISHA, -1);
 
-        // Asr (Shia/Shafi'i shadow factor = 1):
-        // tan(altitude) = 1 / (1 + tan(|lat - decl|))
-        const latRad = (Math.PI / 180) * lat;
-        const asrAlt = Math.atan(1 / (1 + Math.tan(Math.abs(latRad - decl))));
-        const cosHAsr = (Math.sin(-asrAlt) - Math.sin(latRad) * Math.sin(decl)) /
-            (Math.cos(latRad) * Math.cos(decl));
-        let asrMin = NaN;
-        if (cosHAsr >= -1 && cosHAsr <= 1) {
-            const HAsr = Math.acos(cosHAsr);
-            asrMin = solarNoonMinutes + (HAsr * 180 / Math.PI) / 15 * 60;
+        // Get prayer params from i18n (based on language / user setting)
+        const prayerParams = (typeof I18N !== 'undefined') ? I18N.getPrayerParams() : { fajrAngle: 17.7, ishaAngle: 14.0, asrFactor: 1 };
+        const latRad = (Math.PI / 180) * lat; // for Asr calculation below
+
+        let fajrMin = NaN, ishaMin = NaN, asrMin = NaN;
+
+        // Fajr (only if prayer method has fajrAngle)
+        if (prayerParams.fajrAngle != null) {
+            const fajrZenith = 90 + prayerParams.fajrAngle;
+            fajrMin = minutesForZenith(fajrZenith, +1);
+        }
+
+        // Isha (only if prayer method has ishaAngle)
+        if (prayerParams.ishaAngle != null) {
+            const ishaZenith = 90 + prayerParams.ishaAngle;
+            ishaMin = minutesForZenith(ishaZenith, -1);
+        }
+
+        // Asr (only if prayer method has asrFactor)
+        if (prayerParams.asrFactor != null) {
+            const factor = prayerParams.asrFactor;
+            const asrAlt = Math.atan(factor / (factor + Math.tan(Math.abs(latRad - decl))));
+            const cosHAsr = (Math.sin(-asrAlt) - Math.sin(latRad) * Math.sin(decl)) /
+                (Math.cos(latRad) * Math.cos(decl));
+            if (cosHAsr >= -1 && cosHAsr <= 1) {
+                const HAsr = Math.acos(cosHAsr);
+                asrMin = solarNoonMinutes + (HAsr * 180 / Math.PI) / 15 * 60;
+            }
         }
 
         const dayStart = Date.UTC(year, dateUtc.getUTCMonth(), dateUtc.getUTCDate(), 0, 0, 0);
